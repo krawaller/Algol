@@ -187,11 +187,9 @@ Algol = (function(){
 						y: newpos.y,
 						aid: def.aid,
 						dir:dir,
-						type: "offset"
+						artifact: "offset"
 					};
-					if (start.hasOwnProperty("uid")){
-						sqr.uid = start.uid;
-					}
+					sqr = Object.merge(sqr,start); // steal collected stuff from startsquare (uid,etc)
 					if (def.hasOwnProperty("mark")){
 						sqr.mark = def.mark;
 					}
@@ -205,7 +203,7 @@ Algol = (function(){
 		return ret;
 	}
 	
-	function walker(def,starts,stops,boarddims){
+	function walker(def,starts,stops,boarddims,steps){
 		var ret = [], o;
 		starts.map(function(start){
 			(def.dirs || [1]).map(function(dir){
@@ -213,7 +211,7 @@ Algol = (function(){
 					dir = dirRelativeTo(dir,start.dir);
 				}
 				var steppos = moveInDir(start.x,start.y,dir,1,0), step = 1;
-				while(isOnBoard(steppos,boarddims) && step<=(def.max || 66666)){
+				while(isOnBoard(steppos,boarddims) && step<=(def.max || 66666) && (!steps || filterList(steps,{type:"PROPS",props:{x:steppos.x,y:steppos.y}}).length)){
 					if (filterList(stops,{type:"PROPS",props:{x:steppos.x,y:steppos.y}}).length){
 						if (def.createatstop) {
 							o = {
@@ -221,11 +219,9 @@ Algol = (function(){
 								y: steppos.y,
 								aid: def.aid,
 								dir: dir,
-								type: "walkstop"
+								artifact: "walkstop"
 							};
-							if (start.hasOwnProperty("uid")){
-								o.uid = start.uid;
-							}
+							o = Object.merge(o,start); // steal collected stuff from startsquare (uid,etc)
 							if (def.hasOwnProperty("stoptag")){
 								o.tag = def.stoptag;
 							}
@@ -241,13 +237,11 @@ Algol = (function(){
 							x: steppos.x,
 							y: steppos.y,
 							aid: def.aid,
-							type: "walkstep",
+							artifact: "walkstep",
 							dir: dir,
 							step: step
 						};
-						if (start.hasOwnProperty("uid")){
-							o.uid = start.uid;
-						}
+						o = Object.merge(o,start); // steal collected stuff from startsquare (uid,etc)
 						if (def.hasOwnProperty("stepmark")){
 							o.mark = def.stepmark;
 						}
@@ -270,12 +264,13 @@ Algol = (function(){
 			return l1.length-l2.length;
 		});
 		lists[0].map(function(pos){
-			if (filterList(ret, {x: pos.x, y: pos.y }).length == 0) {
+			if (filterList(ret, {x: pos.x, y: pos.y }).length == 0) { // not already collected
 				for (var i = 1; i < lists.length; i++) {
 					found = false;
 					for (var p = 0; p < lists[i].length; p++) {
 						if (lists[i][p].x == pos.x || lists[i][p].y == pos.y) {
 							found = true;
+							pos = Object.merge(pos,lists[i][p]);
 							p = lists[i].length;
 						}
 					}
@@ -283,7 +278,7 @@ Algol = (function(){
 						return;
 					}
 				}
-				ret.push({x:pos.x,y:pos.y});
+				ret.push(pos);
 			}
 		});
 		return ret;
@@ -310,7 +305,6 @@ Algol = (function(){
 			case "AND":
 			case "OR":
 				test.tests.map(function(t){
-					console.log("TESTING",t,cauldron[t.from]);
 					lists.push(filterList(cauldron[t.from],t.props,vars,copy.concat(t.collect || [])));
 				});
 				list = test.type == "AND" ? findCommonPos(lists) : uniqueSquares(Array.flatten(lists));
@@ -322,9 +316,7 @@ Algol = (function(){
 			ret.push(o);
 		});
 		if (test.except && !excepting){
-			console.log("EXCEPT!");
 			var forbidden = searchCauldron(cauldron,test.except,true), oklist = [];
-			console.log("EXCEPT",forbidden);
 			ret.map(function(l){
 				var violating = false;
 				forbidden.map(function(f){
