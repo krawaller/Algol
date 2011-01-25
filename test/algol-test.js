@@ -402,6 +402,44 @@ TestCase("Artifact walker",{
 	}
 });
 
+TestCase("Spawn",{
+	"test should be defined": function(){
+		assertFunction(Algol.artifact.spawn);
+	},
+	"test should return correct artifacts": function(){
+		var where, exp, def, res;
+		def = {
+			aid: "spawntest"
+		};
+		where = [{x:2,y:3,foo:"BAR"}];
+		exp = [{x:2,y:3,foo:"BAR",aid:"spawntest",artifact:"spawn"}];
+		res = Algol.artifact.spawn(def,where); 
+		assertEquals(exp,res);
+	},
+	"test should include tags": function(){
+		var where, exp, def, res;
+		def = {
+			aid: "spawntest",
+			tag: "WOOO"
+		};
+		where = [{x:2,y:3,foo:"BAR"}];
+		exp = [{x:2,y:3,foo:"BAR",aid:"spawntest",artifact:"spawn",tag:"WOOO"}];
+		res = Algol.artifact.spawn(def,where); 
+		assertEquals(exp,res);
+	},
+	"test should include marks": function(){
+		var where, exp, def, res;
+		def = {
+			aid: "spawntest",
+			mark: "BAX"
+		};
+		where = [{x:2,y:3,foo:"BAR"}];
+		exp = [{x:2,y:3,foo:"BAR",aid:"spawntest",artifact:"spawn",mark:"BAX"}];
+		res = Algol.artifact.spawn(def,where); 
+		assertEquals(exp,res);
+	}
+});
+
 TestCase("MoveInDir",{
 	"test should be defined":function(){
 		assertFunction(Algol.utils.moveInDir);

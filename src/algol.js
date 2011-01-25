@@ -173,7 +173,16 @@ Algol = (function(){
 	}
 	
 	function offset(def,starts,boarddims){
-		var ret = [];
+		var ret = [], mould = {
+			artifact: "offset",
+			aid: def.aid
+		};
+		if (def.hasOwnProperty("mark")){
+			mould.mark = def.mark;
+		}
+		if (def.hasOwnProperty("tag")){
+			mould.tag = def.tag;
+		}
 		def.dirs = def.dirs || [1];
 		starts.map(function(start){
 			(def.dirs || [1]).map(function(dir){
@@ -182,23 +191,26 @@ Algol = (function(){
 				}
 				var newpos = moveInDir(start.x,start.y,dir,def.forward,def.right), sqr;
 				if (isOnBoard(newpos,boarddims)){
-					sqr = {
-						x: newpos.x,
-						y: newpos.y,
-						aid: def.aid,
-						dir:dir,
-						artifact: "offset"
-					};
-					sqr = Object.merge(sqr,start); // steal collected stuff from startsquare (uid,etc)
-					if (def.hasOwnProperty("mark")){
-						sqr.mark = def.mark;
-					}
-					if (def.hasOwnProperty("tag")){
-						sqr.tag = def.tag;
-					}
-					ret.push(sqr);
+					ret.push(Object.merge({dir:dir},newpos,mould,start));
 				}
 			});
+		});
+		return ret;
+	}
+	
+	function spawn(def,where){
+		var ret = [], mould = {
+			artifact: "spawn",
+			aid: def.aid
+		};
+		if(def.hasOwnProperty("tag")){
+			mould.tag = def.tag;
+		}
+		if(def.hasOwnProperty("mark")){
+			mould.mark = def.mark;
+		}
+		where.map(function(o){
+			ret.push(Object.merge(o,mould));
 		});
 		return ret;
 	}
@@ -564,7 +576,8 @@ Algol = (function(){
 		},
 		artifact: {
 			offset: offset,
-			walker: walker
+			walker: walker,
+			spawn: spawn
 		}
 	};
 })();
