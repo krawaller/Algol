@@ -346,6 +346,53 @@ Algol = (function(){
 		return ret;
 	}
 	
+	function collectPotentialMarks(markdefs,selectedmarks,artifacts){
+		var ret = [],pos;
+		for(var mid in markdefs){
+			pos = {};
+			var markdef = markdefs[mid], markreqmet = !markdef.requiremark, reqprop;
+			if (markdef.requiremark){
+				selectedmarks.map(function(o){
+					if (o.mark = mid){
+						markreqmet = true;
+						if (markdef.requiresame){
+							reqprop = o[markdef.requiresame];
+						}
+					}
+				})
+			}
+			if (markreqmet){
+				artifacts.map(function(a){
+					if (a.mark == mid && (!markdef.requiresame || a[markdef.requiresame] == reqprop) && !pos[a.y*1000+a.x]){
+						ret.push(a);
+						pos[a.y*1000+a.x] = true;
+					} 
+				})
+			}
+		}
+		return ret;
+	}
+	
+	function collectPotentialCommands(cmnddefs,selectedmarks,artifacts){
+		var ret = [], cmnddef, reqmet;
+		for(var cid in cmnddefs){
+			cmnddef = cmnddefs[cid];
+			reqmet = !cmnddef.requiremark;
+			if (cmnddef.requiremark){
+				selectedmarks.map(function(o){
+					if (o.mark == cmnddef.requiremark){
+						reqmet = true;
+					}
+				});
+			}
+			if (reqmet){
+				ret.push(cmnddef);
+			}
+		}
+		return ret;
+	}
+	
+	
 	var games = {
 		daggers: {
 			boards: {
@@ -797,7 +844,9 @@ Algol = (function(){
 			moveInDir: moveInDir,
 			dirRelativeTo: dirRelativeTo,
 			searchCauldron: searchCauldron,
-			findCommonPos: findCommonPos
+			findCommonPos: findCommonPos,
+			collectPotentialMarks: collectPotentialMarks,
+			collectPotentialCommands: collectPotentialCommands
 		},
 		artifact: {
 			offset: offset,

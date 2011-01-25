@@ -643,3 +643,134 @@ TestCase("searchCauldron",{
 		assertEquals([{x:2,y:2,terrain:"hill",artifact:"walkstop"}],Algol.utils.searchCauldron(cauldron,test));
 	}
 });
+
+TestCase("collectPotentialMarks",{
+	"test should be defined": function(){
+		assertFunction(Algol.utils.collectPotentialMarks);
+	},
+	"test should return empty array if no matches": function(){
+		assertEquals([],Algol.utils.collectPotentialMarks({},[],[]));
+	},
+	"test should not collect for marks with required mark missing": function(){
+		var markdefs, selmarks, artifacts, exp;
+		markdefs = {
+			foo: {
+				requiremark: "bar"
+			}
+		};
+		selmarks = [];
+		artifacts = [{
+			mark: "foo"
+		}];
+		exp = [];
+		assertEquals([],Algol.utils.collectPotentialMarks(markdefs,selmarks,artifacts));
+	},
+	"test should not collect for marks with failing property check": function(){
+		var markdefs, selmarks, artifacts, exp;
+		markdefs = {
+			foo: {
+				requiremark: "bar",
+				requiresame: "tag"
+			}
+		};
+		selmarks = [{
+			mark: "bar",
+			tag: "XXX"
+		}];
+		artifacts = [{
+			mark: "foo",
+			tag: "YYY"
+		}];
+		exp = [];
+		assertEquals([],Algol.utils.collectPotentialMarks(markdefs,selmarks,artifacts));
+	},
+	"test should collect for marks with fulfilled checks": function(){
+		var markdefs, selmarks, artifacts, exp;
+		markdefs = {
+			foo: {
+				requiremark: "bar",
+				requiresame: "tag"
+			}
+		};
+		selmarks = [{
+			mark: "bar",
+			tag: "XXX"
+		}];
+		artifacts = [{
+			mark: "foo",
+			tag: "XXX"
+		},{
+			mark: "baz"
+		}];
+		exp = [];
+		assertEquals([{mark:"foo",tag:"XXX"}],Algol.utils.collectPotentialMarks(markdefs,selmarks,artifacts));
+	},
+	"test should exclude same square for already selected mark": function(){
+		var markdefs, selmarks, artifacts, exp;
+		markdefs = {
+			foo: {
+			}
+		};
+		selmarks = [];
+		artifacts = [{
+			x: 1,
+			y: 1,
+			mark: "foo"
+		},{
+			x:1,
+			y:1,
+			mark:"foo"
+		}];
+		exp = [];
+		assertEquals([{mark:"foo",x:1,y:1}],Algol.utils.collectPotentialMarks(markdefs,selmarks,artifacts));
+	}
+});
+
+TestCase("CollectPotentialCommands",{
+	"test should be defined": function(){
+		assertFunction(Algol.utils.collectPotentialCommands);
+	},
+	"test should return nothing if no matches": function(){
+		var cmnddefs, selmarks, artifacts, exp, res;
+		cmnddefs = {};
+		selmarks = [];
+		artifacts = [];
+		exp = [];
+		res = Algol.utils.collectPotentialCommands(cmnddefs,selmarks,artifacts);
+		assertEquals(exp,res);
+	},
+	"test should return nothing if reqs aren't met": function(){
+		var cmnddefs, selmarks, artifacts, exp, res;
+		cmnddefs = {
+			foo: {
+				name: "foo",
+				requiremark: "bar"
+			}
+		};
+		selmarks = [{mark:"baz"}];
+		artifacts = [];
+		exp = [];
+		res = Algol.utils.collectPotentialCommands(cmnddefs,selmarks,artifacts);
+		assertEquals(exp,res);
+	},
+	"test should return mark if reqs are met": function(){
+		var cmnddefs, selmarks, artifacts, exp, res;
+		cmnddefs = {
+			foo: {
+				name: "foo",
+				requiremark: "bar"
+			},
+			baz: {
+				requiremark: "biz"
+			}
+		};
+		selmarks = [{mark:"bar"}];
+		artifacts = [];
+		exp = [{
+			name: "foo",
+			requiremark: "bar"
+		}];
+		res = Algol.utils.collectPotentialCommands(cmnddefs,selmarks,artifacts);
+		assertEquals(exp,res);
+	}
+});
