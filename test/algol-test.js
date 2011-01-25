@@ -13,6 +13,9 @@ TestCase("testObjectProperties",{
 	},
 	"test should return false if object does not have all props": function(){
 		assertFalse(Algol.utils.testObjectProperties({x:4,y:5,z:6},{y:5,p:555}));
+	},
+	"test should allow for multiple properties": function(){
+		assertTrue(Algol.utils.testObjectProperties({x:4},{x:[3,4,5]}));
 	}
 });
 
@@ -78,6 +81,13 @@ TestCase("Filter list function",{
 		    list = [obj1,obj2,obj3,obj4],
 			test = {foo:"b"};
 		assertEquals([obj2,obj3],Algol.utils.filterList(list,test));
+	},
+	"test should accommodate for special vars": function(){
+		var obj1 = {foo:"a"}, obj2 = {foo:"b"}, obj3 = {foo:"b"}, obj4 = {foo:"c"},
+		    list = [obj1,obj2,obj3,obj4],
+			test = {foo:"BLAH"},
+			vars = {BLAH:"b"};
+		assertEquals([obj2,obj3],Algol.utils.filterList(list,test,vars));
 	}
 });
 
@@ -169,11 +179,11 @@ TestCase("Artifact Offset",{
 		definition = {
 			forward: 2,
 			right: 3,
-			create: "artifact",
-			aid: "FOO"
+			aid: "FOO",
+			tag: "wuu"
 		};
 		starts = [{x:2,y:3},{x:4,y:4},{x:7,y:2}];
-		exp = [{x:5,y:1,type:"artifact",aid:"FOO"},{x:7,y:2,type:"artifact",aid:"FOO"}];
+		exp = [{x:5,y:1,type:"offset",aid:"FOO",dir:1,tag:"wuu"},{x:7,y:2,type:"offset",aid:"FOO",dir:1,tag:"wuu"}];
 		res = Algol.artifact.offset(definition,starts,boarddims);
 		assertEquals(exp,res);
 	},
@@ -182,11 +192,11 @@ TestCase("Artifact Offset",{
 		definition = {
 			forward: 2,
 			right: 3,
-			create: "artifact",
-			aid: "FOO"
+			aid: "FOO",
+			tag: "wuu"
 		};
 		starts = [{x:2,y:3,uid:666},{x:4,y:4},{x:7,y:2}];
-		exp = [{x:5,y:1,type:"artifact",aid:"FOO",uid:666},{x:7,y:2,type:"artifact",aid:"FOO"}];
+		exp = [{x:5,y:1,type:"offset",aid:"FOO",uid:666,dir:1,tag:"wuu"},{x:7,y:2,type:"offset",aid:"FOO",dir:1,tag:"wuu"}];
 		res = Algol.artifact.offset(definition,starts,boarddims);
 		assertEquals(exp,res);
 	},
@@ -195,14 +205,28 @@ TestCase("Artifact Offset",{
 		definition = {
 			forward: 2,
 			right: 1,
-			create: "artifact",
 			aid: "FOO",
-			relative: true
+			relative: true,
+			tag: "wuu"
 		};
 		starts = [{x:2,y:3,uid:666,dir:3},{x:4,y:4,dir:7},{x:7,y:2,dir:5}];
-		exp = [{x:4,y:4,type:"artifact",aid:"FOO",uid:666},
-		       {x:2,y:3,type:"artifact",aid:"FOO"},
-			   {x:6,y:4,type:"artifact",aid:"FOO"}];
+		exp = [{x:4,y:4,type:"offset",aid:"FOO",uid:666,dir:3,tag:"wuu"},
+		       {x:2,y:3,type:"offset",aid:"FOO",dir:7,tag:"wuu"},
+			   {x:6,y:4,type:"offset",aid:"FOO",dir:5,tag:"wuu"}];
+		res = Algol.artifact.offset(definition,starts,boarddims);
+		assertEquals(exp,res);
+	},
+	"test should include mark if set": function(){
+		var definition, starts, boarddims = {x:7,y:5}, exp, res;
+		definition = {
+			forward: 2,
+			right: 3,
+			aid: "FOO",
+			mark: "BAR",
+			tag: "wuu"
+		};
+		starts = [{x:2,y:3},{x:4,y:4},{x:7,y:2}];
+		exp = [{x:5,y:1,type:"offset",aid:"FOO",mark:"BAR",dir:1,tag:"wuu"},{x:7,y:2,type:"offset",aid:"FOO",mark:"BAR",dir:1,tag:"wuu"}];
 		res = Algol.artifact.offset(definition,starts,boarddims);
 		assertEquals(exp,res);
 	}
@@ -217,12 +241,13 @@ TestCase("Artifact walker",{
 		def = {
 			aid: "FOO",
 			dirs: [1,3,5],
-			createatstop: "artifact"
+			createatstop: true,
+			stoptag: "wuu"
 		};
 		starts = [{x:2,y:4}];
 		stops = [{x:2,y:1},{x:5,y:4}];
-		exp = [{x:2,y:1,type:"artifact",aid:"FOO"},
-		       {x:5,y:4,type:"artifact",aid:"FOO"}];
+		exp = [{x:2,y:1,type:"walkstop",aid:"FOO",dir:1,tag:"wuu"},
+		       {x:5,y:4,type:"walkstop",aid:"FOO",dir:3,tag:"wuu"}];
 		res = Algol.artifact.walker(def,starts,stops,boarddims);
 		assertEquals(exp,res);
 	},
@@ -231,14 +256,16 @@ TestCase("Artifact walker",{
 		def = {
 			aid: "FOO",
 			dirs: [1],
-			createatstop: "artifact",
-			createatstep: "marktarget"
+			createatstop: true,
+			createatstep: true,
+			stoptag: "wuu",
+			steptag: "wee"
 		};
 		starts = [{x:2,y:4}];
 		stops = [{x:2,y:1}];
-		exp = [{x:2,y:3,type:"marktarget",aid:"FOO",step:1},
-			   {x:2,y:2,type:"marktarget",aid:"FOO",step:2},
-		       {x:2,y:1,type:"artifact",aid:"FOO"}];
+		exp = [{x:2,y:3,type:"walkstep",aid:"FOO",step:1,dir:1,tag:"wee"},
+			   {x:2,y:2,type:"walkstep",aid:"FOO",step:2,dir:1,tag:"wee"},
+		       {x:2,y:1,type:"walkstop",aid:"FOO",dir:1,tag:"wuu"}];
 		res = Algol.artifact.walker(def,starts,stops,boarddims);
 		assertEquals(exp,res);
 	},
@@ -247,12 +274,13 @@ TestCase("Artifact walker",{
 		def = {
 			aid: "FOO",
 			dirs: [1],
-			createatstep: "marktarget"
+			createatstep: true,
+			steptag: "wuu"
 		};
 		starts = [{x:2,y:4}];
 		stops = [{x:2,y:1}];
-		exp = [{x:2,y:3,type:"marktarget",aid:"FOO",step:1},
-			   {x:2,y:2,type:"marktarget",aid:"FOO",step:2}];
+		exp = [{x:2,y:3,type:"walkstep",aid:"FOO",step:1,dir:1,tag:"wuu"},
+			   {x:2,y:2,type:"walkstep",aid:"FOO",step:2,dir:1,tag:"wuu"}];
 		res = Algol.artifact.walker(def,starts,stops,boarddims);
 		assertEquals(exp,res);
 	},
@@ -261,14 +289,16 @@ TestCase("Artifact walker",{
 		def = {
 			aid: "FOO",
 			dirs: [1],
-			createatstop: "artifact",
-			createatstep: "marktarget"
+			createatstop: true,
+			createatstep: true,
+			stoptag: "wuu",
+			steptag: "wee"
 		};
 		starts = [{x:2,y:4,uid:666}];
 		stops = [{x:2,y:1}];
-		exp = [{x:2,y:3,type:"marktarget",aid:"FOO",step:1,uid:666},
-			   {x:2,y:2,type:"marktarget",aid:"FOO",step:2,uid:666},
-		       {x:2,y:1,type:"artifact",aid:"FOO",uid:666}];
+		exp = [{x:2,y:3,type:"walkstep",aid:"FOO",step:1,uid:666,dir:1,tag:"wee"},
+			   {x:2,y:2,type:"walkstep",aid:"FOO",step:2,uid:666,dir:1,tag:"wee"},
+		       {x:2,y:1,type:"walkstop",aid:"FOO",uid:666,dir:1,tag:"wuu"}];
 		res = Algol.artifact.walker(def,starts,stops,boarddims);
 		assertEquals(exp,res);
 	},
@@ -277,16 +307,18 @@ TestCase("Artifact walker",{
 		def = {
 			aid: "FOO",
 			dirs: [1,3],
-			createatstop: "artifact",
-			createatstep: "marktarget",
-			relative: true
+			createatstop: true,
+			createatstep: true,
+			relative: true,
+			stoptag: "wuu",
+			steptag: "wee"
 		};
 		starts = [{x:2,y:4,uid:666,dir:3}];
 		stops = [{x:5,y:4},{x:2,y:5}];
-		exp = [{x:3,y:4,type:"marktarget",aid:"FOO",step:1,uid:666},
-			   {x:4,y:4,type:"marktarget",aid:"FOO",step:2,uid:666},
-		       {x:5,y:4,type:"artifact",aid:"FOO",uid:666},
-			   {x:2,y:5,type:"artifact",aid:"FOO",uid:666}];
+		exp = [{x:3,y:4,type:"walkstep",aid:"FOO",step:1,uid:666,dir:3,tag:"wee"},
+			   {x:4,y:4,type:"walkstep",aid:"FOO",step:2,uid:666,dir:3,tag:"wee"},
+		       {x:5,y:4,type:"walkstop",aid:"FOO",uid:666,dir:3,tag:"wuu"},
+			   {x:2,y:5,type:"walkstop",aid:"FOO",uid:666,dir:5,tag:"wuu"}];
 		res = Algol.artifact.walker(def,starts,stops,boarddims);
 		assertEquals(exp,res);
 	},
@@ -295,18 +327,60 @@ TestCase("Artifact walker",{
 		def = {
 			aid: "FOO",
 			dirs: [1],
-			createatstop: "artifact",
-			createatstep: "marktarget",
-			relative: true
+			createatstop: true,
+			createatstep: true,
+			relative: true,
+			stoptag: "wuu",
+			steptag: "wee"
 		};
 		starts = [{x:2,y:4,uid:666,dir:2}];
 		stops = [{x:1,y:5}];
-		exp = [{x:3,y:3,type:"marktarget",aid:"FOO",step:1,uid:666},
-			   {x:4,y:2,type:"marktarget",aid:"FOO",step:2,uid:666},
-			   {x:5,y:1,type:"marktarget",aid:"FOO",step:3,uid:666}];
+		exp = [{x:3,y:3,type:"walkstep",aid:"FOO",step:1,uid:666,dir:2,tag:"wee"},
+			   {x:4,y:2,type:"walkstep",aid:"FOO",step:2,uid:666,dir:2,tag:"wee"},
+			   {x:5,y:1,type:"walkstep",aid:"FOO",step:3,uid:666,dir:2,tag:"wee"}];
 		res = Algol.artifact.walker(def,starts,stops,boarddims);
 		assertEquals(exp,res);
 	},
+	"test should honour maxlength": function(){
+		var def,starts,stops,boarddims = {x:7,y:5}, exp, res;
+		def = {
+			aid: "FOO",
+			dirs: [1],
+			createatstop: true,
+			createatstep: true,
+			relative: true,
+			max: 3,
+			stoptag: "wuu",
+			steptag: "wee"
+		};
+		starts = [{x:2,y:4,uid:666,dir:3}];
+		stops = [{x:1,y:5}];
+		exp = [{x:3,y:4,type:"walkstep",aid:"FOO",step:1,uid:666,dir:3,tag:"wee"},
+			   {x:4,y:4,type:"walkstep",aid:"FOO",step:2,uid:666,dir:3,tag:"wee"},
+			   {x:5,y:4,type:"walkstep",aid:"FOO",step:3,uid:666,dir:3,tag:"wee"}];
+		res = Algol.artifact.walker(def,starts,stops,boarddims);
+		assertEquals(exp,res);
+	},
+	"test should include mark if set": function(){
+		var def,starts,stops,boarddims = {x:7,y:5}, exp, res;
+		def = {
+			aid: "FOO",
+			dirs: [1],
+			createatstop: true,
+			createatstep: true,
+			stopmark: "BAR",
+			stepmark: "BAZ",
+			stoptag: "wuu",
+			steptag: "wee"
+		};
+		starts = [{x:2,y:4,uid:666}];
+		stops = [{x:2,y:1}];
+		exp = [{x:2,y:3,type:"walkstep",aid:"FOO",mark:"BAZ",step:1,uid:666,dir:1,tag:"wee"},
+			   {x:2,y:2,type:"walkstep",aid:"FOO",mark:"BAZ",step:2,uid:666,dir:1,tag:"wee"},
+		       {x:2,y:1,type:"walkstop",aid:"FOO",mark:"BAR",uid:666,dir:1,tag:"wuu"}];
+		res = Algol.artifact.walker(def,starts,stops,boarddims);
+		assertEquals(exp,res);
+	}
 });
 
 TestCase("MoveInDir",{
@@ -334,5 +408,133 @@ TestCase("dirRelativeTo",{
 		assertEquals(5,Algol.utils.dirRelativeTo(2,4));
 		assertEquals(7,Algol.utils.dirRelativeTo(8,8));
 		assertEquals(1,Algol.utils.dirRelativeTo(3,7));
+	}
+});
+
+
+TestCase("FindCommonPos",{
+	"test should be defined": function(){
+		assertFunction(Algol.utils.findCommonPos);
+	},
+	"test should return correct pos": function(){
+		var lists = [
+			[{x:2,y:2},{x:2,y:3},{x:2,y:4},{x:1,y:666}],
+			[{x:1,y:666},{x:2,y:3}],
+			[{x:2,y:3},{x:1,y:666}]
+		];
+		assertEquals([{x:1,y:666},{x:2,y:3}],Algol.utils.findCommonPos(lists));
+	},
+	"test if only one list, should return positions for all of that list": function(){
+		var lists = [[{x:2,y:2},{x:2,y:3},{x:2,y:4},{x:1,y:666}]],
+			exp = [{x:2,y:2},{x:2,y:3},{x:2,y:4},{x:1,y:666}];
+		assertEquals(exp,Algol.utils.findCommonPos(lists));
+	}
+});
+
+
+TestCase("searchCauldron",{
+	"test should be defined": function(){
+		assertFunction(Algol.utils.searchCauldron);
+	},
+	"test should return correct squares for single props test": function(){
+		var cauldron = {
+			terrain: [{x:2,y:2,type:"hill"},{x:3,y:3,type:"lake"}],
+			units: [{uid:1,x:2,y:2,type:"soldier",plr:1}],
+			artifacts: [{x:2,y:2,type:"walkstop"}]
+		};
+		var test = {
+			from: "terrain",
+			props: {
+				type: "lake"
+			}
+		};
+		assertEquals([{x:3,y:3}],Algol.utils.searchCauldron(cauldron,test));
+	},
+	"test should return correct list for AND test": function(){
+		var cauldron = {
+			terrain: [{x:2,y:2,type:"hill"},{x:3,y:3,type:"lake"}],
+			unit: [{uid:1,x:2,y:2,type:"soldier",plr:1}],
+			artifact: [{x:2,y:2,type:"walkstop"}]
+		};
+		var test = {
+			type: "AND",
+			tests: [{
+				from: "terrain",
+				props: {
+					type: "hill"
+				}
+			},{
+				from: "artifact",
+				props: {
+					type: "walkstop"
+				}
+			}]
+		};
+		assertEquals([{x:2,y:2}],Algol.utils.searchCauldron(cauldron,test));
+	},
+	"test should return correct list for OR test": function(){
+		var cauldron = {
+			terrain: [{x:2,y:2,type:"hill"},{x:3,y:3,type:"lake"}],
+			unit: [{uid:1,x:2,y:2,type:"soldier",plr:1}],
+			artifact: [{x:2,y:2,type:"walkstop"}]
+		};
+		var test = {
+			type: "OR",
+			tests: [{
+				from: "terrain",
+				props: {
+					type: "lake"
+				}
+			},{
+				from: "unit",
+				props: {
+					uid: 1
+				}
+			}]
+		};
+		assertEquals([{x:2,y:2},{x:3,y:3}],Algol.utils.searchCauldron(cauldron,test));
+	},
+	"test should exclude EXCEPT squares": function(){
+		var cauldron = {
+			terrain: [{x:2,y:2,type:"hill"},{x:3,y:3,type:"lake"}],
+			units: [{uid:1,x:2,y:2,type:"soldier",plr:1}],
+			artifact: [{x:2,y:2,type:"walkstop"}]
+		};
+		var test = {
+			type: "OR",
+			tests: [{
+				from: "terrain",
+				props: {
+					type: "lake"
+				}
+			},{
+				from: "units",
+				props: {
+					uid: 1
+				}
+			}],
+			except: {
+				from: "terrain",
+				props: {
+					type: "hill"
+				}
+			}
+		};
+		assertEquals([{x:3,y:3}],Algol.utils.searchCauldron(cauldron,test));
+	},
+	"test should collect uid from given source for singletest queries": function(){
+		var cauldron = {
+			terrain: [{x:2,y:2,type:"hill"},{x:3,y:3,type:"lake"}],
+			unit: [{uid:1,x:2,y:2,type:"soldier",plr:1}],
+			artifact: [{x:2,y:2,type:"walkstop"}]
+		};
+		var test = {
+			from: "unit",
+			collect: ["uid"],
+			props: {
+				type: "soldier"
+			}
+		};
+		assertEquals([{x:2,y:2,uid:1}],Algol.utils.searchCauldron(cauldron,test));
 	}
 });
