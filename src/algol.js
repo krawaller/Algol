@@ -280,10 +280,10 @@ Algol = (function(){
 				for (var i = 1; i < lists.length; i++) {
 					found = false;
 					for (var p = 0; p < lists[i].length; p++) {
-						if (lists[i][p].x == pos.x || lists[i][p].y == pos.y) {
+						if (lists[i][p].x == pos.x && lists[i][p].y == pos.y) {
 							found = true;
 							pos = Object.merge(pos,lists[i][p]);
-							p = lists[i].length;
+							p = lists[i].length; // only need one hit per list
 						}
 					}
 					if (!found){
@@ -311,38 +311,25 @@ Algol = (function(){
 		return ret;
 	}
 	
-	function searchCauldron(cauldron,test,vars,excepting){
-		var ret = [], list, lists = [], copy = ["x","y"];
-		switch(test.type){
-			case "AND":
-			case "OR":
-				test.tests.map(function(t){
-					lists.push(filterList(cauldron[t.from],t.props,vars,copy.concat(t.collect || [])));
-				});
-				list = test.type == "AND" ? findCommonPos(lists) : uniqueSquares(Array.flatten(lists));
-				break;
-			default:
-				list = filterList(cauldron[test.from],{type:"PROPS",props:test.props},vars,copy.concat(test.collect || []));
+	function tester(cauldron,test,vars){
+		var ret = [], lists = [];
+		// complex test, run through list
+		if (test.tests){
+			test.tests.map(function(t){
+				lists.push(tester(cauldron,t,vars));
+			});
+			return test.or ? uniqueSquares(Array.flatten(lists)) : findCommonPos(lists);
 		}
-		list.map(function(o){
+		// single query, perform and return result
+		var bowl = cauldron[test.from], props = test.props;
+		bowl.map(function(o){
+			for(var p in props){
+				if (o[p] !== props[p]){
+					return;
+				}
+			}
 			ret.push(o);
 		});
-		if (test.except && !excepting){
-			var forbidden = searchCauldron(cauldron,test.except,vars,true), oklist = [];
-			ret.map(function(l){
-				var violating = false;
-				forbidden.map(function(f){
-					if (l.x == f.x && l.y == f.y){
-						violating = true;
-						return;
-					}
-				});
-				if (!violating){
-					oklist.push(l);
-				}
-			});
-			ret = oklist;
-		} 
 		return ret;
 	}
 	
@@ -807,10 +794,10 @@ Algol = (function(){
 			calcCollection: calcCollection,
 			moveInDir: moveInDir,
 			dirRelativeTo: dirRelativeTo,
-			searchCauldron: searchCauldron,
 			findCommonPos: findCommonPos,
 			collectPotentialMarks: collectPotentialMarks,
-			collectPotentialCommands: collectPotentialCommands
+			collectPotentialCommands: collectPotentialCommands,
+			tester: tester
 		},
 		artifact: {
 			offset: offset,

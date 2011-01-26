@@ -489,161 +489,6 @@ TestCase("FindCommonPos",{
 });
 
 
-TestCase("searchCauldron",{
-	"test should be defined": function(){
-		assertFunction(Algol.utils.searchCauldron);
-	},
-	"test should return correct squares for single props test": function(){
-		var cauldron = {
-			terrain: [{x:2,y:2,type:"hill"},{x:3,y:3,type:"lake"}],
-			units: [{uid:1,x:2,y:2,type:"soldier",plr:1}],
-			artifacts: [{x:2,y:2,type:"walkstop"}]
-		};
-		var test = {
-			from: "terrain",
-			props: {
-				type: "lake"
-			}
-		};
-		assertEquals([{x:3,y:3}],Algol.utils.searchCauldron(cauldron,test));
-	},
-	"test should return correct list for AND test": function(){
-		var cauldron = {
-			terrain: [{x:2,y:2,type:"hill"},{x:3,y:3,type:"lake"}],
-			unit: [{uid:1,x:2,y:2,type:"soldier",plr:1}],
-			artifact: [{x:2,y:2,type:"walkstop"}]
-		};
-		var test = {
-			type: "AND",
-			tests: [{
-				from: "terrain",
-				props: {
-					type: "hill"
-				}
-			},{
-				from: "artifact",
-				props: {
-					type: "walkstop"
-				}
-			}]
-		};
-		assertEquals([{x:2,y:2}],Algol.utils.searchCauldron(cauldron,test));
-	},
-	"test should return correct list for OR test": function(){
-		var cauldron = {
-			terrain: [{x:2,y:2,type:"hill"},{x:3,y:3,type:"lake"}],
-			unit: [{uid:1,x:2,y:2,type:"soldier",plr:1}],
-			artifact: [{x:2,y:2,type:"walkstop"}]
-		};
-		var test = {
-			type: "OR",
-			tests: [{
-				from: "terrain",
-				props: {
-					type: "lake"
-				}
-			},{
-				from: "unit",
-				props: {
-					uid: 1
-				}
-			}]
-		};
-		assertEquals([{x:2,y:2},{x:3,y:3}],Algol.utils.searchCauldron(cauldron,test));
-	},
-	"test should exclude EXCEPT squares": function(){
-		var cauldron = {
-			terrain: [{x:2,y:2,type:"hill"},{x:3,y:3,type:"lake"}],
-			units: [{uid:1,x:2,y:2,type:"soldier",plr:1}],
-			artifact: [{x:2,y:2,type:"walkstop"}]
-		};
-		var test = {
-			type: "OR",
-			tests: [{
-				from: "terrain",
-				props: {
-					type: "lake"
-				}
-			},{
-				from: "units",
-				props: {
-					uid: 1
-				}
-			}],
-			except: {
-				from: "terrain",
-				props: {
-					type: "hill"
-				}
-			}
-		};
-		assertEquals([{x:3,y:3}],Algol.utils.searchCauldron(cauldron,test));
-	},
-	"test should collect uid from given source for singletest queries": function(){
-		var cauldron = {
-			terrain: [{x:2,y:2,type:"hill"},{x:3,y:3,type:"lake"}],
-			unit: [{uid:1,x:2,y:2,type:"soldier",plr:1}],
-			artifact: [{x:2,y:2,type:"walkstop"}]
-		};
-		var test = {
-			from: "unit",
-			collect: ["uid"],
-			props: {
-				type: "soldier"
-			}
-		};
-		assertEquals([{x:2,y:2,uid:1}],Algol.utils.searchCauldron(cauldron,test));
-	},
-	"test should collect correctly for OR queries": function(){
-		var cauldron = {
-			terrain: [{x:2,y:2,type:"hill"},{x:3,y:3,type:"lake"}],
-			units: [{uid:1,x:2,y:2,type:"soldier",plr:1}],
-			artifact: [{x:2,y:2,type:"walkstop"}]
-		};
-		var test = {
-			type: "OR",
-			tests: [{
-				from: "terrain",
-				props: {
-					type: "lake"
-				},
-				collect: ["type"]
-			},{
-				from: "units",
-				props: {
-					uid: 1
-				},
-				collect: ["plr"]
-			}]
-		};
-		assertEquals([{x:2,y:2,plr:1},{x:3,y:3,type:"lake"}],Algol.utils.searchCauldron(cauldron,test));
-	},
-	"test should collect correctly for AND test": function(){
-		var cauldron = {
-			terrain: [{x:2,y:2,terrain:"hill"},{x:3,y:3,terrain:"lake"}],
-			unit: [{uid:1,x:2,y:2,type:"soldier",plr:1}],
-			artifact: [{x:2,y:2,artifact:"walkstop"}]
-		};
-		var test = {
-			type: "AND",
-			tests: [{
-				from: "terrain",
-				collect: ["terrain"],
-				props: {
-					terrain: "hill"
-				}
-			},{
-				from: "artifact",
-				collect: ["artifact"],
-				props: {
-					artifact: "walkstop"
-				}
-			}]
-		};
-		assertEquals([{x:2,y:2,terrain:"hill",artifact:"walkstop"}],Algol.utils.searchCauldron(cauldron,test));
-	}
-});
-
 TestCase("collectPotentialMarks",{
 	"test should be defined": function(){
 		assertFunction(Algol.utils.collectPotentialMarks);
@@ -771,6 +616,145 @@ TestCase("CollectPotentialCommands",{
 			requiremark: "bar"
 		}];
 		res = Algol.utils.collectPotentialCommands(cmnddefs,selmarks,artifacts);
+		assertEquals(exp,res);
+	}
+});
+
+TestCase("Tester function",{
+	"test should be defined": function(){
+		assertFunction(Algol.utils.tester);
+	},
+	"test should run single query properly": function(){
+		var cauldron, query, res, exp;
+		cauldron = {
+			foo: [{
+				bar: "baz"
+			},{
+				bar: "biz"
+			},{
+				moo: "buz"
+			},{
+				bar: "baz",
+				moo: "bez"
+			}]
+		};
+		query = {
+			from: "foo",
+			props: {
+				bar: "baz"
+			}
+		};
+		exp = [{
+			bar: "baz"
+		},{
+			bar: "baz",
+			moo: "bez"
+		}];
+		res = Algol.utils.tester(cauldron,query,{});
+		assertEquals(exp,res);
+	},
+	"test should run normal AND test properly": function(){
+		var cauldron, test, query1, query2, res, exp;
+		cauldron = {
+			foo: [{
+				moo: "bez",
+				pee: "moo",
+				x: 1,
+				y: 5
+			},{
+				bar: "baz",
+				moo: "bez",
+				blah: "bluh",
+				x: 2,
+				y: 2
+			}],
+			foofoo: [{
+				bar: "baz",
+				moo: "bez",
+				fee: "fuu",
+				x: 2,
+				y: 2
+			}]
+		};
+		query1 = {
+			from: "foo",
+			props: {
+				bar: "baz"
+			}
+		};
+		query2 = {
+			from: "foofoo",
+			props: {
+				moo: "bez"
+			}
+		};
+		test = {
+			tests: [query1,query2]
+		};
+		exp = [{
+			bar: "baz",
+			moo: "bez",
+			blah: "bluh",
+			fee: "fuu",
+			x: 2,
+			y: 2
+		}];
+		res = Algol.utils.tester(cauldron,test,{});
+		assertEquals(exp,res);
+	},
+	"test should run OR test properly": function(){
+		var cauldron, test, query1, query2, res, exp;
+		cauldron = {
+			foo: [{
+				moo: "bez",
+				pee: "moo",
+				x: 1,
+				y: 5
+			},{
+				bar: "baz",
+				moo: "bez",
+				blah: "bluh",
+				x: 2,
+				y: 2
+			}],
+			foofoo: [{
+				bar: "baz",
+				moo: "bez",
+				fee: "fuu",
+				x: 2,
+				y: 2
+			}]
+		};
+		query1 = {
+			from: "foo",
+			props: {
+				pee: "moo"
+			}
+		};
+		query2 = {
+			from: "foofoo",
+			props: {
+				moo: "bez"
+			}
+		};
+		test = {
+			tests: [query1,query2],
+			or: true
+		};
+		exp = [{
+			bar: "baz",
+			moo: "bez",
+			fee: "fuu",
+			x: 2,
+			y: 2
+		},{
+			moo: "bez",
+			pee: "moo",
+			x: 1,
+			y: 5
+		}];
+		res = Algol.utils.tester(cauldron,test,{});
+		console.log(res);
 		assertEquals(exp,res);
 	}
 });
