@@ -18,16 +18,6 @@ Algol = (function(){
 		return ret;
 	};
 	
-	Array.unique = function(arr){
-		var ret = [];
-		for(var i=0,l=arr.length;i<l;i++){
-			if (ret.indexOf(arr[i])===-1){
-				ret.push(arr[i]);
-			}
-		}
-		return ret;
-	};
-	
 	Object.merge = function(){
     	if (!arguments[0]){
 	        arguments[0] = {};
@@ -41,58 +31,6 @@ Algol = (function(){
 	    Array.prototype.splice.call(arguments,1,1);
 	    return arguments.length === 1 ? arguments[0] : Object.merge.apply(0,arguments);
 	};
-	
-	function testObjectProperties(obj,props,vars){
-		for(var p in props){
-			if (obj[p] !== props[p] && (!props[p].indexOf || props[p].indexOf(obj[p]) == -1 ) && (!vars || vars[props[p]] !== obj[p])){
-				return false;
-			}
-		}
-		return true;
-	};
-	
-    function testObject(obj,test,vars){
-		switch(test.type){
-			case "PROPS":
-				return testObjectProperties(obj,test.props,vars);
-			case "AND": 
-				for(var i=0,s=test.tests.length;i<s;i++){
-					if (!testObject(obj,test.tests[i],vars)){
-						return false;
-					}
-				}
-				return true;
-			case "OR": 
-				for(var i=0,s=test.tests.length;i<s;i++){
-					if (testObject(obj,test.tests[i],vars)){
-						return true;
-					}
-				}
-				return false;
-			case "NOT":
-				return !testObject(obj,test.test,vars);
-			default: 
-				return testObjectProperties(obj,test,vars);
-		}
-	}
-	function filterList(list,test,vars,collect){
-		var result = [];
-		list.map(function(obj){
-			if (testObject(obj,test,vars)){
-				if (collect) {
-					var o = {};
-					collect.map(function(p){
-						o[p] = obj[p];
-					});
-					result.push(o);
-				}
-				else {
-					result.push(obj);
-				}
-			}
-		});
-		return result;
-	}
 	
 	function calcPropertyValue(startvalue,changes,step){
 		if (!changes){
@@ -223,8 +161,8 @@ Algol = (function(){
 					dir = dirRelativeTo(dir,start.dir);
 				}
 				var steppos = moveInDir(start.x,start.y,dir,1,0), step = 1;
-				while(isOnBoard(steppos,boarddims) && step<=(def.max || 66666) && (!steps || filterList(steps,{type:"PROPS",props:{x:steppos.x,y:steppos.y}}).length)){
-					if (filterList(stops,{type:"PROPS",props:{x:steppos.x,y:steppos.y}}).length){
+				while(isOnBoard(steppos,boarddims) && step<=(def.max || 66666) && (!steps || querier(steps,{props:{x:steppos.x,y:steppos.y}}).length)){
+					if (querier(stops,{props:{x:steppos.x,y:steppos.y}}).length){
 						if (def.createatstop) {
 							o = {
 								x: steppos.x,
@@ -269,20 +207,26 @@ Algol = (function(){
 		});
 		return ret;
 	}
-	
+	/**
+	 * Used only in tester
+	 * @param {Array} lists Array of arrays of objects
+	 * @return Array of positions found in all lists
+	 */
 	function findCommonPos(lists){
-		var ret = [], found = false;
+		var ret = [], found = false, usedpos = {};
 		lists.sort(function(l1,l2){
 			return l1.length-l2.length;
 		});
 		lists[0].map(function(pos){
-			if (filterList(ret, {x: pos.x, y: pos.y }).length == 0) { // not already collected
+			if (!usedpos[pos.y*1000+pos.x]){ // TODO: figure out if this is really needed! 
 				for (var i = 1; i < lists.length; i++) {
 					found = false;
 					for (var p = 0; p < lists[i].length; p++) {
-						if (lists[i][p].x == pos.x && lists[i][p].y == pos.y) {
+						var c = lists[i][p];
+						if (c.x == pos.x && c.y == pos.y) {
 							found = true;
-							pos = Object.merge(pos,lists[i][p]);
+							usedpos[c.y*1000+c.x] = true;
+							pos = Object.merge(pos,c);
 							p = lists[i].length; // only need one hit per list
 						}
 					}
@@ -296,6 +240,10 @@ Algol = (function(){
 		return ret;
 	}
 	
+	/**
+	 * Used only in Tester 
+	 * @param {Object} list 
+	 */
 	function uniqueSquares(list){
 		var sqrs = {}, ret = [];
 		list.map(function(s){
@@ -311,17 +259,16 @@ Algol = (function(){
 		return ret;
 	}
 	
-	function tester(cauldron,test,vars){
-		var ret = [], lists = [];
-		// complex test, run through list
-		if (test.tests){
-			test.tests.map(function(t){
-				lists.push(tester(cauldron,t,vars));
-			});
-			return test.or ? uniqueSquares(Array.flatten(lists)) : findCommonPos(lists);
-		}
-		// single query, perform and return result
-		var bowl = cauldron[test.from], props = test.props;
+	/**
+	 * Walks through a list of objects and returns matches to property obj
+	 * Used by tester and artifact functions
+	 * @param {Object} cauldron
+	 * @param {Object} query
+	 * @param {Object} vars
+	 * @return {Array} Array of hits from correct cauldron bowl
+	 */
+	function querier(cauldron,query,vars){
+		var ret = [], bowl = cauldron[query.from] || cauldron, props = query.props;
 		bowl.map(function(o){
 			for(var p in props){
 				if (o[p] !== props[p]){
@@ -331,6 +278,36 @@ Algol = (function(){
 			ret.push(o);
 		});
 		return ret;
+	}
+	
+	/**
+	 * Used to execute tests from various sources
+	 * @param {Object} cauldron
+	 * @param {Object} test
+	 * @param {Object} vars
+	 * @return {Array} list of objects fulfilling positions
+	 */
+	function tester(cauldron,test,vars){
+		var lists = [], ret, ok = [], except;
+		// complex test, run through list
+		if (test.tests){
+			test.tests.map(function(t){
+				lists.push(tester(cauldron,t,vars));
+			});
+			ret = test.or ? uniqueSquares(Array.flatten(lists)) : findCommonPos(lists);
+			if (test.except){
+				except = tester(cauldron,test.except,vars);
+				ret.map(function(o){
+					if (!querier(except,{props:{x:o.x,y:o.y}}).length){
+						ok.push(o);
+					}
+				});
+				ret = ok;
+			}
+			return ret;
+		}
+		// single query, perform and return result
+		return uniqueSquares(querier(cauldron,test,vars));
 	}
 	
 	function collectPotentialMarks(markdefs,selectedmarks,artifacts){
@@ -346,7 +323,7 @@ Algol = (function(){
 							reqprop = o[markdef.requiresame];
 						}
 					}
-				})
+				});
 			}
 			if (markreqmet){
 				artifacts.map(function(a){
@@ -354,7 +331,7 @@ Algol = (function(){
 						ret.push(a);
 						pos[a.y*1000+a.x] = true;
 					} 
-				})
+				});
 			}
 		}
 		return ret;
@@ -589,8 +566,8 @@ Algol = (function(){
 						{x:3,y:4,terrain:"castle"},{x:6,y:4,terrain:"castle"},{x:8,y:4,terrain:"castle"},{x:12,y:4,terrain:"castle"},{x:14,y:4,terrain:"castle"},{x:17,y:4,terrain:"castle"},
 						{x:3,y:5,terrain:"castle"},{x:6,y:5,terrain:"castle"},{x:8,y:5,terrain:"castle"},{x:12,y:5,terrain:"castle"},{x:14,y:5,terrain:"castle"},{x:17,y:5,terrain:"castle"},
 						{x:3,y:6,terrain:"castle"},{x:6,y:6,terrain:"castle"},{x:8,y:6,terrain:"castle"},{x:9,y:6,terrain:"castle"},{x:10,y:6,terrain:"castle"},{x:11,y:6,terrain:"castle"},{x:12,y:6,terrain:"castle"},{x:14,y:6,terrain:"castle"},{x:17,y:6,terrain:"castle"},
-						{x:3,y:7,terrain:"castle"},{x:6,y:7,terrain:"castle"},{x:8,y:7,terrain:"castle"},{x:12,y:7,terrain:"castle"},{x:14,y:7,terrain:"castle"},{x:17,y:7,terrain:"castle"},
-						{x:3,y:8,terrain:"castle"},{x:17,y:8,terrain:"castle"},
+						{x:3,y:7,terrain:"castle"},{x:17,y:7,terrain:"castle"},
+						{x:3,y:8,terrain:"castle"},{x:4,y:8,terrain:"castle"},{x:5,y:8,terrain:"castle"},{x:6,y:8,terrain:"castle"},{x:7,y:8,terrain:"castle"},{x:8,y:8,terrain:"castle"},{x:9,y:8,terrain:"castle"},{x:11,y:8,terrain:"castle"},{x:12,y:8,terrain:"castle"},{x:13,y:8,terrain:"castle"},{x:14,y:8,terrain:"castle"},{x:15,y:8,terrain:"castle"},{x:16,y:8,terrain:"castle"},{x:17,y:8,terrain:"castle"},
 						{x:3,y:12,terrain:"castle"},{x:4,y:12,terrain:"castle"},{x:5,y:12,terrain:"castle"},{x:6,y:12,terrain:"castle"},{x:7,y:12,terrain:"castle"},{x:8,y:12,terrain:"castle"},{x:9,y:12,terrain:"castle"},{x:11,y:12,terrain:"castle"},{x:12,y:12,terrain:"castle"},{x:13,y:12,terrain:"castle"},{x:14,y:12,terrain:"castle"},{x:15,y:12,terrain:"castle"},{x:16,y:12,terrain:"castle"},{x:17,y:12,terrain:"castle"},
 						{x:3,y:13,terrain:"castle"},{x:17,y:13,terrain:"castle"},
 						{x:3,y:14,terrain:"castle"},{x:6,y:14,terrain:"castle"},{x:8,y:14,terrain:"castle"},{x:9,y:14,terrain:"castle"},{x:10,y:14,terrain:"castle"},{x:11,y:14,terrain:"castle"},{x:12,y:14,terrain:"castle"},{x:14,y:14,terrain:"castle"},{x:17,y:14,terrain:"castle"},
@@ -786,18 +763,20 @@ Algol = (function(){
 	// Expose
 	return {
 		utils: {
-			testObjectProperties: testObjectProperties,
-			testObject: testObject,
-			filterList: filterList,
-			calcPropertyValue: calcPropertyValue,
-			calcObject: calcObject,
-			calcCollection: calcCollection,
 			moveInDir: moveInDir,
 			dirRelativeTo: dirRelativeTo,
-			findCommonPos: findCommonPos,
 			collectPotentialMarks: collectPotentialMarks,
-			collectPotentialCommands: collectPotentialCommands,
-			tester: tester
+			collectPotentialCommands: collectPotentialCommands
+		},
+		time: {
+			calcPropertyValue: calcPropertyValue,
+			calcObject: calcObject,
+			calcCollection: calcCollection
+		},
+		cauldron: {
+			findCommonPos: findCommonPos,
+			tester: tester,
+			querier: querier
 		},
 		artifact: {
 			offset: offset,

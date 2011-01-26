@@ -4,123 +4,35 @@ TestCase("Algol namespace definition",{
 	}
 });
 
-TestCase("testObjectProperties",{
-	"test should be defined": function(){
-		assertFunction(Algol.utils.testObjectProperties);
-	},
-	"test should return true if object has all props": function(){
-		assertTrue(Algol.utils.testObjectProperties({x:4,y:5,z:6},{y:5}));
-	},
-	"test should return false if object does not have all props": function(){
-		assertFalse(Algol.utils.testObjectProperties({x:4,y:5,z:6},{y:5,p:555}));
-	},
-	"test should allow for multiple properties": function(){
-		assertTrue(Algol.utils.testObjectProperties({x:4},{x:[3,4,5]}));
-	}
-});
-
-TestCase("testObject",{
-	"test should be defined": function(){
-		assertFunction(Algol.utils.testObject);
-	},
-	"test should use testObjectProperties if called with props obj": function(){
-		var obj = {x:4,y:5,z:6},
-			pass = {type:"PROPS",props:{y:5}},
-			fail = {type:"PROPS",props:{y:5,p:666}};
-		assertTrue(Algol.utils.testObject(obj,pass));
-		assertFalse(Algol.utils.testObject(obj,fail));
-	},
-	"test should assume that testobj is a props obj if no known type is given": function(){
-		var obj = {x:4,y:5,z:6};
-		assertTrue(Algol.utils.testObject(obj,{y:5}));
-	},
-	"test should loop through tests in AND type obj and return correct type": function(){
-		var obj = {x:4,y:5,z:6},
-			pass = {type:"PROPS",props:{y:5}},
-			fail = {type:"PROPS",props:{y:5,p:666}};
-		assertTrue(Algol.utils.testObject(obj,{type:"AND",tests:[pass,pass]}));
-		assertFalse(Algol.utils.testObject(obj,{type:"AND",tests:[pass,fail]}));
-	},
-	"test should loop through tests in AND type obj and return correct type": function(){
-		var obj = {x:4,y:5,z:6},
-			pass = {type:"PROPS",props:{y:5}},
-			fail = {type:"PROPS",props:{y:5,p:666}};
-		assertTrue(Algol.utils.testObject(obj,{type:"OR",tests:[pass,fail]}));
-		assertFalse(Algol.utils.testObject(obj,{type:"OR",tests:[fail,fail]}));
-	},
-	"test should handle NOT correctly": function(){
-		var obj = {x:4,y:5,z:6},
-			pass = {type:"PROPS",props:{y:5}},
-			fail = {type:"PROPS",props:{y:5,p:666}};
-		assertTrue(Algol.utils.testObject(obj,{type:"NOT",test:fail}));
-		assertFalse(Algol.utils.testObject(obj,{type:"NOT",test:pass}));
-	},
-	"test should nest correctly": function(){
-		var obj = {x:4,y:5,z:6},
-			pass = {type:"PROPS",props:{y:5}},
-			fail = {type:"PROPS",props:{y:5,p:666}};
-		assertTrue(Algol.utils.testObject(obj,{
-			type: "AND",
-			tests: [pass,pass,{
-				type: "OR",
-				tests: [fail,{
-					type: "NOT",
-					test: fail
-				}]
-			}]
-		}));
-	}
-});
-
-TestCase("Filter list function",{
-	"test should be defined": function(){
-		assertFunction(Algol.utils.filterList);
-	},
-	"test should return array of all objs in list that fulfill test": function(){
-		var obj1 = {foo:"a"}, obj2 = {foo:"b"}, obj3 = {foo:"b"}, obj4 = {foo:"c"},
-		    list = [obj1,obj2,obj3,obj4],
-			test = {foo:"b"};
-		assertEquals([obj2,obj3],Algol.utils.filterList(list,test));
-	},
-	"test should accommodate for special vars": function(){
-		var obj1 = {foo:"a"}, obj2 = {foo:"b"}, obj3 = {foo:"b"}, obj4 = {foo:"c"},
-		    list = [obj1,obj2,obj3,obj4],
-			test = {foo:"BLAH"},
-			vars = {BLAH:"b"};
-		assertEquals([obj2,obj3],Algol.utils.filterList(list,test,vars));
-	}
-});
-
-
 TestCase("CalcPropertyValue",{
 	"test should be defined": function(){
-		assertFunction(Algol.utils.calcPropertyValue);
+		assertFunction(Algol.time.calcPropertyValue);
 	},
 	"test if no changes should just return start value": function(){
-		assertEquals("a",Algol.utils.calcPropertyValue("a"));
+		assertEquals("a",Algol.time.calcPropertyValue("a"));
 	},
 	"test if no step, should return last value from the list": function(){
-		assertEquals("d",Algol.utils.calcPropertyValue("a",[[2,"b"],[3,"c"],[4,"d"]]));
+		assertEquals("d",Algol.time.calcPropertyValue("a",[[2,"b"],[3,"c"],[4,"d"]]));
 	},
 	"test if changes and step, should return correct value": function(){
 		var changes = [[2,"b"],[4,"c"],[8,"d"]];
-		assertEquals("d",Algol.utils.calcPropertyValue("a",changes,10));
-		assertEquals("c",Algol.utils.calcPropertyValue("a",changes,4));
-		assertEquals("b",Algol.utils.calcPropertyValue("a",changes,3));
-		assertEquals("a",Algol.utils.calcPropertyValue("a",changes,1));
+		assertEquals("d",Algol.time.calcPropertyValue("a",changes,10));
+		assertEquals("c",Algol.time.calcPropertyValue("a",changes,4));
+		assertEquals("b",Algol.time.calcPropertyValue("a",changes,3));
+		assertEquals("a",Algol.time.calcPropertyValue("a",changes,1));
 	}
 });
 
 
 TestCase("CalcObject",{
 	"test should be defined": function(){
-		assertFunction(Algol.utils.calcObject);
+		assertFunction(Algol.time.calcObject);
 	},
 	"test if no changes, should just return startprops": function(){
 		var startprops = {a:1,b:1,c:1},
 			changes = undefined,
 			step = undefined,
-			res = Algol.utils.calcObject(startprops,changes,step);
+			res = Algol.time.calcObject(startprops,changes,step);
 		assertEquals(startprops,res);
 	},
 	"test should return correct props": function(){
@@ -130,14 +42,14 @@ TestCase("CalcObject",{
 				B:[[2,"bb"],[5,"bbb"]]
 			},
 			step = undefined,
-			res = Algol.utils.calcObject(startprops,changes,step);
+			res = Algol.time.calcObject(startprops,changes,step);
 		assertEquals({A:"aaa",B:"bbb",C:"c"},res);
 	}
 });
 
 TestCase("calcCollection",{
 	"test should be defined": function(){
-		assertFunction(Algol.utils.calcCollection);
+		assertFunction(Algol.time.calcCollection);
 	},
 	"test if no changeset, should just return startset": function(){
 		var startset = {
@@ -146,7 +58,7 @@ TestCase("calcCollection",{
 		},
 		    changeset = undefined,
 			step = undefined,
-			res = Algol.utils.calcCollection(startset,changeset,step);
+			res = Algol.time.calcCollection(startset,changeset,step);
 		assertEquals(startset,res);
 	},
 	"test should return correct objs": function(){
@@ -160,7 +72,7 @@ TestCase("calcCollection",{
 			u2: {A:[[2,"-aa"],[4,"-aaa"]]}
 		},
 			step = 3,
-			res = Algol.utils.calcCollection(startset,changeset,step),
+			res = Algol.time.calcCollection(startset,changeset,step),
 			exp = {
 				u1: {A:"aa",B:"b"},
 				u2: {A:"-aa",B:"-b"},
@@ -471,7 +383,7 @@ TestCase("dirRelativeTo",{
 
 TestCase("FindCommonPos",{
 	"test should be defined": function(){
-		assertFunction(Algol.utils.findCommonPos);
+		assertFunction(Algol.cauldron.findCommonPos);
 	},
 	"test should return correct pos": function(){
 		var lists = [
@@ -479,12 +391,12 @@ TestCase("FindCommonPos",{
 			[{x:1,y:666},{x:2,y:3}],
 			[{x:2,y:3},{x:1,y:666}]
 		];
-		assertEquals([{x:1,y:666},{x:2,y:3}],Algol.utils.findCommonPos(lists));
+		assertEquals([{x:1,y:666},{x:2,y:3}],Algol.cauldron.findCommonPos(lists));
 	},
 	"test if only one list, should return positions for all of that list": function(){
 		var lists = [[{x:2,y:2},{x:2,y:3},{x:2,y:4},{x:1,y:666}]],
 			exp = [{x:2,y:2},{x:2,y:3},{x:2,y:4},{x:1,y:666}];
-		assertEquals(exp,Algol.utils.findCommonPos(lists));
+		assertEquals(exp,Algol.cauldron.findCommonPos(lists));
 	}
 });
 
@@ -622,13 +534,15 @@ TestCase("CollectPotentialCommands",{
 
 TestCase("Tester function",{
 	"test should be defined": function(){
-		assertFunction(Algol.utils.tester);
+		assertFunction(Algol.cauldron.tester);
 	},
 	"test should run single query properly": function(){
 		var cauldron, query, res, exp;
 		cauldron = {
 			foo: [{
-				bar: "baz"
+				bar: "baz",
+				x:8,
+				y:9
 			},{
 				bar: "biz"
 			},{
@@ -645,12 +559,14 @@ TestCase("Tester function",{
 			}
 		};
 		exp = [{
-			bar: "baz"
+			bar: "baz",
+			x: 8,
+			y: 9
 		},{
 			bar: "baz",
 			moo: "bez"
 		}];
-		res = Algol.utils.tester(cauldron,query,{});
+		res = Algol.cauldron.tester(cauldron,query,{});
 		assertEquals(exp,res);
 	},
 	"test should run normal AND test properly": function(){
@@ -699,7 +615,7 @@ TestCase("Tester function",{
 			x: 2,
 			y: 2
 		}];
-		res = Algol.utils.tester(cauldron,test,{});
+		res = Algol.cauldron.tester(cauldron,test,{});
 		assertEquals(exp,res);
 	},
 	"test should run OR test properly": function(){
@@ -753,8 +669,108 @@ TestCase("Tester function",{
 			x: 1,
 			y: 5
 		}];
-		res = Algol.utils.tester(cauldron,test,{});
+		res = Algol.cauldron.tester(cauldron,test,{});
 		console.log(res);
+		assertEquals(exp,res);
+	},
+	"test should honour except list": function(){
+		var cauldron, test, query1, query2, res, exp;
+		cauldron = {
+			foo: [{
+				moo: "bez",
+				pee: "moo",
+				x: 1,
+				y: 5
+			},{
+				bar: "baz",
+				moo: "bez",
+				blah: "bluh",
+				x: 2,
+				y: 2
+			}],
+			foofoo: [{
+				bar: "baz",
+				moo: "bez",
+				fee: "fuu",
+				x: 2,
+				y: 2
+			}]
+		};
+		query1 = {
+			from: "foo",
+			props: {
+				moo: "bez"
+			}
+		};
+		query2 = {
+			from: "foofoo",
+			props: {
+				moo: "bez"
+			}
+		};
+		test = {
+			tests: [query1],
+			except: query2
+		};
+		exp = [{
+			moo: "bez",
+			pee: "moo",
+			x: 1,
+			y: 5
+		}];
+		res = Algol.cauldron.tester(cauldron,test,{});
+		assertEquals(exp,res);
+	}
+});
+
+TestCase("Querier",{
+	"test should be defined": function(){
+		assertFunction(Algol.cauldron.querier);
+	},
+	"test should work": function(){
+		var cauldron, query, res, exp;
+		cauldron = {
+			foo: [{
+				bar: "baz"
+			},{
+				bar: "biz"
+			},{
+				moo: "buz"
+			},{
+				bar: "baz",
+				moo: "bez"
+			}]
+		};
+		query = {
+			from: "foo",
+			props: {
+				bar: "baz"
+			}
+		};
+		exp = [{
+			bar: "baz"
+		},{
+			bar: "baz",
+			moo: "bez"
+		}];
+		res = Algol.cauldron.querier(cauldron,query,{});
+		assertEquals(exp,res);
+	},
+	"test if cauldron is single array, should always use that no matter what from prop says": function(){
+		var cauldron, query, res, exp;
+		cauldron = [{
+			bar: "baz"
+		}];
+		query = {
+			from: "foo",
+			props: {
+				bar: "baz"
+			}
+		};
+		exp = [{
+			bar: "baz"
+		}];
+		res = Algol.cauldron.querier(cauldron,query,{});
 		assertEquals(exp,res);
 	}
 });

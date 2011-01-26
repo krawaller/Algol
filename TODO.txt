@@ -1,9 +1,10 @@
 
-  [ ] Test & query system FFS! New tester funktion!
+  [X] Test & query system FFS! New tester funktion!
        [X] run single query
-       [X] run AND query
-       [X] run OR query
-       [ ]Êrun query with except
+       [X] run AND test
+       [X] run OR test
+       [X]Êrun test with except
+       [X] run query with flat cauldron
        
   [ ]ÊT&Q dependency calculation
   
@@ -11,4 +12,6 @@
   
   [ ] Command system, effect API, calculation
 
+  [ ] Mark API finalization
+ 
   [ ] Cauldron fetcher! Incl unit calculation 
