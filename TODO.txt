@@ -1,0 +1,7 @@
+
+  [ ] Test & query system FFS!
+  [ ]ÊT&Q dependency calculation
+  [ ]ÊArtifact levels (mark/cmnd/turn)
+  [ ] Command system, effect API, calculation
+
+  [ ] Cauldron fetcher! Incl unit calculation 
