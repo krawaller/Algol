@@ -428,31 +428,13 @@ Algol = (function(){
 			winconditions: {
 				counts: [{
 					ifnot: 0,
-					test: {
-						from: "units",
-						props: {
-							type: "crown",
-							plr: "OPPONENT",
-							status: "dead"
-						}
-					},
+					test: "deadopponentcrown",
 					description: "You killed an opponent Crown!"
 				},{
 					ifnot: 0,
 					test: {
 						type: "AND",
-						tests: [{
-							from: "terrain",
-							props: {
-								type: "base",
-								plr: "OPPONENT"
-							}
-						},{
-							from: "units",
-							props: {
-								plr: "CURRENTPLAYER"
-							}
-						}]
+						tests: ["opponentbase","MYUNITS"]
 					},
 					description: "You infiltrated the opponent camp!"
 				}]
@@ -486,6 +468,66 @@ Algol = (function(){
 			endturnconditions:{
 				actionpointsspent: 1
 			},
+			queries: {
+				mycrowns: {from:"units",props:{unit:"crown",plr:"CURRENTPLAYER"}},
+				mydaggers: {from:"units",props:{unit:"dagger",plr:"CURRENTPLAYER"}},
+				opponentcrown: {
+					from: "units",
+					props: {
+						plr: "OPPONENT",
+						type: "crown"
+					}
+				},
+				daggerdiagtarget: {
+					from: "artifacts",
+					props: {
+						tag: "daggertarget",
+						dir: [2, 4, 6, 8]
+					}
+				},
+				daggerortotarget: {
+					from: "artifacts",
+					props: {
+						tag: "daggertarget",
+						dir: [1, 5]
+					}
+				},
+				crowntarget: {
+					from: "artifacts",
+					props: {
+						tag: "crowntarget"
+					}
+				},
+				deadopponentcrown: {
+					from: "units",
+					props: {
+						type: "crown",
+						plr: "OPPONENT",
+						status: "dead"
+					}
+				},
+				opponentbase: {
+					from: "terrain",
+					props: {
+						type: "base",
+						plr: "OPPONENT"
+					}
+				},
+			},
+			tests: {
+				daggerdiagkill: {
+					type: "AND",
+					queries: ["daggerdiagtarget", "OPPONENTUNITS"]
+				},
+				daggercolumnkill: {
+					type: "AND",
+					queries: ["daggerortotarget", "opponentcrown"]
+				},
+				crownkill: {
+					type: "AND",
+					queries: ["crowntarget", "OPPONENTS"]
+				},
+			},
 			artifactgenerators: {
 				nexttocrown: {
 					type: "walker",
@@ -496,20 +538,8 @@ Algol = (function(){
 					createatstep: true,
 					stoptag: "crowntarget",
 					stepmark: "move",
-					starts: {from:"units",props:{type:"crown",plr:"CURRENTPLAYER"}},
-				/*	starts: {
-						type: "AND",
-						tests: [{
-							from: "marks",
-							props: {
-								type: "select"
-							}
-						},{
-							from: "units",
-							props: {type: "crown"}
-						}]
-					},*/
-					stops: {from:"units",props:{}}
+					starts: "mycrowns",
+					stops: "ALLUNITS"
 				},
 				abovedagger: {
 					type: "walker",
@@ -520,8 +550,8 @@ Algol = (function(){
 					createatstep: true,
 					stoptag: "daggertarget",
 					stepmark: "move",
-					starts: {from:"units",props:{type:"dagger",plr:"CURRENTPLAYER"}},
-					stops: {from:"units",props:{}}
+					starts: "mydaggers",
+					stops: "ALLUNITS"
 				},
 				belowdagger: {
 					type: "walker",
@@ -531,79 +561,32 @@ Algol = (function(){
 					createatstep: true,
 					stoptag: "daggertarget",
 					stepmark: "move",
-					starts: {from:"units",props:{type:"dagger",plr:"CURRENTPLAYER"}},
-					stops: {from:"units",props:{}}
+					starts: "mydaggers",
+					stops: "ALLUNITS"
 				},
 				daggerdiagkill: {
 					type: "spawn",
 					aid: "daggerdiagkill",
 					mark: "kill",
-					test: {
-						type: "AND",
-						tests: [{
-							from: "artifacts",
-							props: {
-								tag: "daggertarget",
-								dir: [2,4,6,8]
-							}
-						},{
-							from: "units",
-							props: {
-								plr: "OPPONENT"
-							}
-						}]
-					}
+					test: "daggerdiagkill"
 				},
-				myunits: {
+				myunits: { // TODO - allow marks to also have hardcoded shit like MYUNITS etc
 					type: "spawn",
 					aid: "myunits",
 					mark: "select",
-					test: {
-						from: "units",
-						props: {
-							plr: "CURRENTPLAYER"
-						}
-					}
+					test: "MYUNITS"
 				},
 				daggercolumnkill: {
 					type: "spawn",
 					aid: "daggercolumnkill",
 					mark: "kill",
-					test: {
-						type: "AND",
-						tests: [{
-							from: "artifacts",
-							props: {
-								tag: "daggertarget",
-								dir: [1,5]
-							}
-						},{
-							from: "units",
-							props: {
-								plr: "OPPONENT",
-								type: "crown"
-							}
-						}]
-					}
+					test: "daggercolumnkill"
 				},
 				crownkill: {
 					type: "spawn",
 					aid: "crownkill",
 					mark: "kill",
-					test: {
-						type: "AND",
-						tests: [{
-							from: "artifacts",
-							props: {
-								tag: "crowntarget"
-							}
-						},{
-							from: "units",
-							props: {
-								plr: "OPPONENT"
-							}
-						}]
-					}
+					test: "crownkill"
 				}
 			}
 		},
@@ -657,21 +640,7 @@ Algol = (function(){
 			winconditions: {
 				counts: [{
 					ifnot: 0,
-					test: {
-						type: "AND",
-						tests: [{
-							from: "units",
-							props: {
-								plr: "CURRENTPLAYER"
-							}
-						},{
-							from: "terrain",
-							props: {
-								plr: "OPPONENT",
-								terrain: "throne"
-							}
-						}]
-					}
+					test: "conqueringunit"
 				}]
 			},
 			endturnconditions: {
@@ -703,6 +672,75 @@ Algol = (function(){
 					actionpoints: 1
 				}
 			},
+			queries: {
+				opponentthrone: {
+					from: "terrain",
+					props: {
+						plr: "OPPONENT",
+						terrain: "throne"
+					}
+				},
+				castlewall: {
+					from: "terrain",
+					props: {
+						terrain: "castle"
+					}
+				},
+				anyterrain: {
+					from: "terrain"
+				},
+				mythrone: {
+					from: "terrain",
+					props: {
+						terrain: "throne",
+						plr: "CURRENTPLAYER"
+					}
+				},
+				inreach: {
+					from: "artifacts",
+					props: {
+						tag: "reach"
+					}
+				},
+				forbidden: {
+					from: "artifacts",
+					props: {
+						tag: "forbidden"
+					}
+				}
+			},
+			tests: {
+				conqueringunit: {
+					type: "AND",
+					tests: ["MYUNITS", "opponentthrone"]
+				},
+				mycastlewallunits: {
+					type: "AND",
+					tests: ["MYUNITS", "castlewall"]
+				},
+				mygroundunits: {
+					type: "EXCEPT",
+					test: "MYUNITS",
+					except: "castlewall" // TODO: should actually be mycastlewall units! :) Nest tests?
+				},
+				groundblocks: {
+					type: "OR",
+					tests: ["ALLUNITS","anyterrain"]
+				},
+				nowalk: {
+					type: "AND",
+					tests: ["ALLUNITS", "mythrone"]
+				},
+				movetargets: {
+					type: "EXCEPT",
+					test: "inreach",
+					except: "forbidden"
+				},
+				potentialtargets: {
+					type: "AND",
+					tests: ["inreach", "OPPONENTUNITS"]
+				},
+			},
 			artifactgenerators: {
 				wallslide: {
 					type: "walker",
@@ -712,28 +750,9 @@ Algol = (function(){
 					createatstep: true,
 					stoptag: "reach",
 					stepmark: "move",
-					starts: {
-						type: "AND",
-						tests: [{
-							from:"units",
-							props:{plr:"CURRENTPLAYER"},
-							collect: "uid"
-						},{
-							from:"terrain",
-							props: {terrain:"castle"}
-						}]
-					},
-					steps: {
-						from: "terrain",
-						props: {
-							terrain: "castle"
-						}
-					},
-					stops: {
-						from:"units",
-						props:{},
-						collect: "uid"
-					}
+					starts: "mycastlewallunits",
+					steps: "castlewall",
+					stops: "ALLUNITS"
 				},
 				groundslide: {
 					type: "walker",
@@ -743,27 +762,8 @@ Algol = (function(){
 					createatstep: true,
 					stoptag: "reach",
 					stepmark: "move",
-					starts: {
-						type: "AND",
-						tests: [{
-							from:"units",
-							props:{plr:"CURRENTPLAYER"},
-							collect: "uid"
-						},{
-							from:"terrain",
-							props: {terrain:"castle"}
-						}]
-					},
-					stops: {
-						type: "OR",
-						tests: [{
-							from:"units",
-							props:{}
-						},{
-							from:"terrain",
-							props: {}
-						}]
-					}
+					starts: "mygroundunits",
+					stops: "groundblocks"
 				},
 				nexttounit: {
 					type: "offset",
@@ -772,61 +772,25 @@ Algol = (function(){
 					forward: 1,
 					right: 0,
 					tag: "reach",
-					starts: {
-						type: "PROPS",
-						test: {
-							from:"units",
-							props: {plr:"CURRENTPLAYER"},
-							collect: "uid"
-						}
-					}
+					starts: "MYUNITS"
 				},
 				forbidden: {
 					type: "spawn",
 					aid: "forbidden",
 					tag: "forbidden",
-					test: {
-						type: "AND",
-						tests: [{
-							from: "units",
-							props: {}
-						},{
-							from: "terrain",
-							props: {
-								terrain: "throne",
-								plr: "CURRENTPLAYER"
-							}
-						}]
-					}
+					test: "nowalk"
 				},
 				reachmove: {
 					type: "spawn",
 					aid: "reachmove",
 					mark: "move",
-					test: {
-						type: "PROPS",
-						from: "artifacts",
-						props: { tag: "reach" },
-						except: {
-							from: "artifacts",
-							props: {tag:"forbidden"}
-						}
-					}
+					test: "movetargets"
 				},
 				kill: {
 					type: "spawn",
 					aid: "kill",
 					mark: "kill",
-					test: {
-						type: "AND",
-						tests: [{
-							from: "artifacts",
-							props: { tag: "reach" }
-						},{
-							from: "units",
-							props: { plr: "OPPONENT" }
-						}]
-					}
+					test: "potentialtargets"
 				}
 			}
 		}
