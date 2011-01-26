@@ -5,6 +5,8 @@
        [X] run OR test
        [X]Êrun test with except
        [X] run query with flat cauldron
+       [ ] multivalue props
+       [ ]Ênotprops?
        
   [ ]ÊT&Q dependency calculation
   

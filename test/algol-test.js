@@ -772,5 +772,28 @@ TestCase("Querier",{
 		}];
 		res = Algol.cauldron.querier(cauldron,query,{});
 		assertEquals(exp,res);
-	}
+	},
+	"test should account for multipos props": function(){
+		var cauldron, query, res, exp;
+		cauldron = {
+			foo: [{
+				bar: "baz",
+				x: 2,
+				y: 3
+			}]
+		};
+		query = {
+			from: "foo",
+			props: {
+				bar: ["boo","baz","bin"]
+			}
+		};
+		exp = [{
+			bar: "baz",
+			x: 2,
+			y: 3
+		}];
+		res = Algol.cauldron.querier(cauldron,query,{});
+		assertEquals(exp,res);
+	},
 });

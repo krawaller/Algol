@@ -271,7 +271,7 @@ Algol = (function(){
 		var ret = [], bowl = cauldron[query.from] || cauldron, props = query.props;
 		bowl.map(function(o){
 			for(var p in props){
-				if (o[p] !== props[p]){
+				if (o[p] !== props[p] && !(props[p].constructor == Array && props[p].indexOf(o[p])!==-1)){
 					return;
 				}
 			}
