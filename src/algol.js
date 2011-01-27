@@ -153,6 +153,15 @@ Algol = (function(){
 		return ret;
 	}
 	
+	/**
+	 * Walker main utility function.
+	 * @param {Object} def Definition object from game
+	 * @param {Array} starts Testerresultlist of matching squares
+	 * @param {Array} stops Testerresultlist of matching squares
+	 * @param {Object} boarddims Object with board dimensions (and maybe kind)
+	 * @param {Array} steps Optional Testerresultlist of matching squares 
+	 * @return {Array} list Array of created artifacts
+	 */
 	function walker(def,starts,stops,boarddims,steps){
 		var ret = [], o;
 		starts.map(function(start){
@@ -271,7 +280,14 @@ Algol = (function(){
 		var ret = [], bowl = cauldron[query.from] || cauldron, props = query.props;
 		bowl.map(function(o){
 			for(var p in props){
-				if (o[p] !== props[p] && !(props[p].constructor == Array && props[p].indexOf(o[p])!==-1)){
+				var ok = o[p] == props[p];
+				if (!ok && props[p].constructor == Array){
+					ok = props[p].indexOf(o[p]) !== -1; 
+				}
+				if (!ok && vars && vars.hasOwnProperty([props[p]])){
+					ok = vars[props[p]] == o[p];
+				}
+				if (!ok){
 					return;
 				}
 			}

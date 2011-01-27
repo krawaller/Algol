@@ -670,7 +670,6 @@ TestCase("Tester function",{
 			y: 5
 		}];
 		res = Algol.cauldron.tester(cauldron,test,{});
-		console.log(res);
 		assertEquals(exp,res);
 	},
 	"test should honour except list": function(){
@@ -796,4 +795,30 @@ TestCase("Querier",{
 		res = Algol.cauldron.querier(cauldron,query,{});
 		assertEquals(exp,res);
 	},
+	"test should account for vars": function(){
+		var cauldron, query, res, exp, vars;
+		cauldron = {
+			foo: [{
+				plr: "1",
+				x: 2,
+				y: 3
+			}]
+		};
+		query = {
+			from: "foo",
+			props: {
+				plr: "CURRENTPLAYER"
+			}
+		};
+		vars = {
+			"CURRENTPLAYER": 1
+		};
+		exp = [{
+			plr: "1",
+			x: 2,
+			y: 3
+		}];
+		res = Algol.cauldron.querier(cauldron,query,vars);
+		assertEquals(exp,res);
+	}
 });
