@@ -1,15 +1,11 @@
 Algol = (function(){
 	
-	Array.filter = function(arr,filter){
-		var ret = [];
-		for(var i=0,l=arr.length;i<l;i++){
-			if (arr[i]!==filter){
-				ret.push(arr[i]);
-			}
-		}
-		return ret;
-	};
-	
+	/**
+	 * Flattens a list of arrays into a single array
+	 * Used by tester
+	 * @param {Array} Array of arrays to flatten
+	 * @return {Array} Single array
+	 */
 	Array.flatten = function(arrs){
 		ret = [];
 		arrs.map(function(arr){
@@ -18,6 +14,12 @@ Algol = (function(){
 		return ret;
 	};
 	
+	/**
+	 * Merges all given objects, property precedence from left
+	 * Used throughout
+	 * @param {Object} ...   Objects to merge
+	 * @return Merged object 
+	 */
 	Object.merge = function(){
     	if (!arguments[0]){
 	        arguments[0] = {};
@@ -32,6 +34,13 @@ Algol = (function(){
 	    return arguments.length === 1 ? arguments[0] : Object.merge.apply(0,arguments);
 	};
 	
+	/**
+	 * Calculates property state at a given time according to startvalue and changes
+	 * @param {Number|String} startvalue
+	 * @param {Array} changes List of changes, each change is [step,value]
+	 * @param {Number} step
+	 * @return {Number|String} Value at given time
+	 */
 	function calcPropertyValue(startvalue,changes,step){
 		if (!changes){
 			return startvalue;
@@ -49,6 +58,14 @@ Algol = (function(){
 		}
 	}
 	
+	/**
+	 * Calculates startvalues and changes for a single object into a given time state
+	 * Used only by calcCollection
+	 * @param {Object} startproperties Starting object
+	 * @param {Object} changes Per property changes
+	 * @param {Number} step Which step to calculate to
+	 * @return {Object} Stepstate object
+	 */
 	function calcObject(startproperties,changes,step){
 		if (!changes){
 			return startproperties;
@@ -65,6 +82,14 @@ Algol = (function(){
 		return ret;
 	}
 	
+	/**
+	 * Takes a set of startvalues and changes, and calculates state for a given time
+	 * Used by cauldron filler
+	 * @param {Object} startset Object with starting conditions
+	 * @param {Object} changeset Object with changes per property per object
+	 * @param {Number} step Which step to calculate to 
+	 * @return {Object} Object with calculated objects 
+	 */
 	function calcCollection(startset,changeset,step){
 		if (!changeset){
 			return startset;
@@ -81,6 +106,16 @@ Algol = (function(){
 		return ret;
 	}
 	
+	/**
+	 * Calculates new square according to directions
+	 * Used by artifactgenerator utility functions
+	 * @param {Number} x
+	 * @param {Number} y
+	 * @param {Number} dir
+	 * @param {Number} forward
+	 * @param {Number} right
+	 * @return {Object} The new position
+	 */
 	function moveInDir(x,y,dir,forward,right){
 		switch(dir){
 			case 2: 
@@ -102,14 +137,36 @@ Algol = (function(){
 		}
 	}
 	
+	/**
+	 * Tests whether or not a given squares is within board bounds
+	 * Used by artifactgenerator utility functions
+	 * @param {Object} pos Coordinates of position to test
+	 * @param {Object} boarddims Object of board dimensions (and maybe kind)
+	 * @return {Boolean} whether or not the position is within bounds
+	 */
 	function isOnBoard(pos,boarddims){
 		return pos.x > 0 && pos.x <= boarddims.x && pos.y>0 && pos.y <= boarddims.y;
 	}
 	
+	/**
+	 * Calculates what a direction is in relation to another direction
+	 * Used by artifactgenerator utility functions
+	 * @param {Number} dir The current direction
+	 * @param {Number} relativeto The direction it should be relative to
+	 * @return {Number} The newly calculated direction
+	 */
 	function dirRelativeTo(dir,relativeto){
 		return [1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8][relativeto-2+dir];
 	}
 	
+	/**
+	 * Offset main utility function
+	 * Called only from doOffset function
+	 * @param {Object} def Offset definition object from game 
+	 * @param {Array} starts Testerresultlist of matching squares
+	 * @param {Object} boarddims Object with board dimensions (and maybe kind)
+	 * @return {Array} list of created artifacts
+	 */
 	function offset(def,starts,boarddims){
 		var ret = [], mould = {
 			artifact: "offset",
@@ -136,6 +193,13 @@ Algol = (function(){
 		return ret;
 	}
 	
+	/**
+	 * Spawn main utility function
+	 * Called only from doSpawn function
+	 * @param {Object} def Definition object from game
+	 * @param {Array} where Testerresultlist of matching squares
+	 * @return {Array} list of created artifacts 
+	 */
 	function spawn(def,where){
 		var ret = [], mould = {
 			artifact: "spawn",
@@ -154,7 +218,8 @@ Algol = (function(){
 	}
 	
 	/**
-	 * Walker main utility function.
+	 * Walker main utility function
+	 * Called only from doWalker function
 	 * @param {Object} def Definition object from game
 	 * @param {Array} starts Testerresultlist of matching squares
 	 * @param {Array} stops Testerresultlist of matching squares
@@ -217,6 +282,7 @@ Algol = (function(){
 		return ret;
 	}
 	/**
+	 * Finds all positions occuring in every list
 	 * Used only in tester
 	 * @param {Array} lists Array of arrays of objects
 	 * @return Array of positions found in all lists
@@ -250,8 +316,10 @@ Algol = (function(){
 	}
 	
 	/**
+	 * merges all same-pos objects in a list, so only has unique positions
 	 * Used only in Tester 
 	 * @param {Object} list 
+	 * @return {Array} List of objects with unique positions
 	 */
 	function uniqueSquares(list){
 		var sqrs = {}, ret = [];
@@ -412,10 +480,7 @@ Algol = (function(){
 					description: "You killed an opponent Crown!"
 				},{
 					ifnot: 0,
-					test: {
-						type: "AND",
-						tests: ["opponentbase","MYUNITS"]
-					},
+					test: "infiltratingunit",
 					description: "You infiltrated the opponent camp!"
 				}]
 			},
@@ -505,8 +570,12 @@ Algol = (function(){
 				},
 				crownkill: {
 					type: "AND",
-					queries: ["crowntarget", "OPPONENTS"]
+					queries: ["crowntarget", "OPPONENTUNITS"]
 				},
+				infiltratingunit: {
+					type: "AND",
+					tests: ["opponentbase", "MYUNITS"]
+				}
 			},
 			artifactgenerators: {
 				nexttocrown: {
