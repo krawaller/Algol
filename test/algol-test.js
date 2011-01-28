@@ -722,6 +722,152 @@ TestCase("Tester function",{
 	}
 });
 
+TestCase("Querier (YKX version)",{
+	"test should be defined": function(){
+		assertFunction(Algol.cauldron.querier2);
+	},
+	"test should return array of objects with unique positions that fulfil the props reqs": function(){
+		var cauldron, query, res, exp;
+		cauldron = {
+			hat: {
+				8003: [{
+					foo: "bar"
+				},{
+					foo: "bee"
+				}],
+				1005: [{
+					foo: "wuu"
+				}]
+			}
+		};
+		query = {
+			from: "hat",
+			props: {
+				foo: "bee"
+			}
+		};
+		exp = {
+			8003: {
+				foo: "bee"
+			}
+		};
+		res = Algol.cauldron.querier2(cauldron,query);
+		assertEquals(exp,res);
+	},
+	"test should handle being give bowl straight instead of cauldron": function(){
+		var bowl, query, res, exp;
+		bowl = {
+			8003: [{
+				foo: "bar"
+			}, {
+				foo: "bee"
+			}],
+			1005: [{
+				foo: "wuu"
+			}]
+		};
+		query = {
+			from: "hat",
+			props: {
+				foo: "bee"
+			}
+		};
+		exp = {
+			8003: {
+				foo: "bee"
+			}
+		};
+		res = Algol.cauldron.querier2(bowl,query);
+		assertEquals(exp,res);
+	},
+	"test should handle multiple possible values in props": function(){
+		var bowl, query, res, exp;
+		bowl = {
+			8003: [{
+				foo: "bar"
+			}, {
+				foo: "bee"
+			}],
+			1005: [{
+				foo: "wuu"
+			}]
+		};
+		query = {
+			from: "hat",
+			props: {
+				foo: ["bee","waa"]
+			}
+		};
+		exp = {
+			8003: {
+				foo: "bee"
+			}
+		};
+		res = Algol.cauldron.querier2(bowl,query);
+		assertEquals(exp,res);
+	},
+	"test should handle variables": function(){
+		var bowl, query, res, exp, vars;
+		bowl = {
+			8003: [{
+				foo: 2
+			}, {
+				foo: "bee"
+			}],
+			1005: [{
+				foo: "wuu"
+			}]
+		};
+		query = {
+			from: "hat",
+			props: {
+				foo: "CURRENTPLAYER"
+			}
+		};
+		exp = {
+			8003: {
+				foo: 2
+			}
+		};
+		vars = {
+			"CURRENTPLAYER":2
+		};
+		res = Algol.cauldron.querier2(bowl,query,vars);
+		assertEquals(exp,res);
+	},
+	"test should handle variables in array of multiple values": function(){
+		var bowl, query, res, exp, vars;
+		bowl = {
+			8003: [{
+				foo: 2
+			}, {
+				foo: "bee"
+			}],
+			1005: [{
+				foo: "wuu"
+			}]
+		};
+		query = {
+			from: "hat",
+			props: {
+				foo: ["boo","CURRENTPLAYER"]
+			}
+		};
+		exp = {
+			8003: {
+				foo: 2
+			}
+		};
+		vars = {
+			"CURRENTPLAYER":2
+		};
+		console.log("LOOK NOW LOOK NOW! :)");
+		res = Algol.cauldron.querier2(bowl,query,vars);
+		console.log(res);
+		assertEquals(exp,res);
+	}
+});
+
 TestCase("Querier",{
 	"test should be defined": function(){
 		assertFunction(Algol.cauldron.querier);
@@ -823,6 +969,7 @@ TestCase("Querier",{
 	}
 });
 
+/*
 TestCase("Cauldron - GetUnitBowl",{
 	"test should be defined": function(){
 		assertFunction(Algol.cauldron.getUnitBowl);
@@ -872,7 +1019,7 @@ TestCase("Cauldron - GetUnitBowl",{
 		res = Algol.cauldron.getUnitBowl(setup,states,moulds,step);
 		assertEquals(exp,res);
 	}
-});
+});*/
 /*
 TestCase("Cauldron - GetTerrainBowl",{
 	"test should be defined": function(){

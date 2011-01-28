@@ -344,6 +344,45 @@ Algol = (function(){
 	 * @param {Object} vars
 	 * @return {Array} Array of hits from correct cauldron bowl
 	 */
+	function querier2(cauldron,query,vars){
+		var ret = {}, bowl = cauldron[query.from] || cauldron, props = query.props;
+		for(var ykx in bowl){
+			var hit = undefined;
+			bowl[ykx].map(function(o){
+				for (var p in props) {
+					var ok = ((o[p] == props[p]) || (vars && vars.hasOwnProperty(props[p]) && vars[props[p]] == o[p]));
+					if (!ok && props[p].constructor == Array) {
+						if (vars){
+							for(var v in vars){
+								props[p].push(vars[v]);
+							}
+						}
+						ok = props[p].indexOf(o[p]) !== -1);
+					}
+					console.log(p,props[p],o[p],alt,ok,vars,vars ? vars.hasOwnProperty(props[p]) : false);
+					if (!ok) {
+						return;
+					}
+				}
+				if (ok){
+					hit = o;
+				}
+			});
+			if (hit){
+				ret[ykx] = hit;
+			}
+		}
+		return ret;
+	}
+	
+	/**
+	 * Walks through a list of objects and returns matches to property obj
+	 * Used by tester and artifact functions
+	 * @param {Object} cauldron
+	 * @param {Object} query
+	 * @param {Object} vars
+	 * @return {Array} Array of hits from correct cauldron bowl
+	 */
 	function querier(cauldron,query,vars){
 		var ret = [], bowl = cauldron[query.from] || cauldron, props = query.props;
 		bowl.map(function(o){
@@ -889,6 +928,7 @@ Algol = (function(){
 			findCommonPos: findCommonPos,
 			tester: tester,
 			querier: querier,
+			querier2: querier2,
 			getUnitBowl: getUnitBowl,
 			getTerrainBowl: getTerrainBowl
 		},
