@@ -394,6 +394,33 @@ Algol = (function(){
 		return uniqueSquares(querier(cauldron,test,vars));
 	}
 	
+	/**
+	 * Fully calculates the Units object for a given step
+	 * Used only by getCauldron
+	 * @param {Object} setup The initial setup
+	 * @param {Object} unitstates Unit changes
+	 * @param {Object} unitmoulds Optional moulds def
+	 * @param {Number} step The step to calculate to
+	 * @return {Object} An object of augmented unit objs
+	 */
+	function getUnitBowl(setup,unitstates,unitmoulds,step){
+		var units = calcCollection(setup,unitstates,step);
+		if (unitmoulds){
+			for(var uid in units){
+				var unit = units[uid];
+				if (unit.unit && unitmoulds[unit.unit]){
+					units[uid] = Object.merge(unit,unitmoulds[unit.unit]);
+				}
+			}
+		}
+		return units;
+	}
+	
+	
+	function getTerrainBowl(terrain,shifts,terrainmoulds,step){
+		
+	}
+	
 	function collectPotentialMarks(markdefs,selectedmarks,artifacts){
 		var ret = [],pos;
 		for(var mid in markdefs){
@@ -861,7 +888,9 @@ Algol = (function(){
 		cauldron: {
 			findCommonPos: findCommonPos,
 			tester: tester,
-			querier: querier
+			querier: querier,
+			getUnitBowl: getUnitBowl,
+			getTerrainBowl: getTerrainBowl
 		},
 		artifact: {
 			offset: offset,

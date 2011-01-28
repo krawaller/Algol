@@ -822,3 +822,83 @@ TestCase("Querier",{
 		assertEquals(exp,res);
 	}
 });
+
+TestCase("Cauldron - GetUnitBowl",{
+	"test should be defined": function(){
+		assertFunction(Algol.cauldron.getUnitBowl);
+	},
+	"test should get right timestate": function(){
+		var setup, states, moulds, exp, res, step = 5;
+		setup = {
+			1: {
+				uid: 1,
+				x: 1,
+				y: 1
+			}
+		};
+		states = {
+			1: {
+				x: [[2,4],[4,5],[6,10]]
+			}
+		};
+		moulds = {
+			
+		};
+		exp = [{uid:1,x:5,y:1}];
+		res = Algol.cauldron.getUnitBowl(setup,states,moulds,step);
+		assertEquals(exp,res);
+	},
+	"test should include props from mould": function(){
+		var setup, states, moulds, exp, res, step = 5;
+		setup = {
+			1: {
+				uid: 1,
+				x: 1,
+				y: 1,
+				unit: "foo"
+			}
+		};
+		states = {
+			1: {
+				x: [[2,4],[4,5],[6,10]]
+			}
+		};
+		moulds = {
+			foo: {
+				bar: "baz"
+			}
+		};
+		exp = [{uid:1,x:5,y:1,unit:"foo",bar:"baz"}];
+		res = Algol.cauldron.getUnitBowl(setup,states,moulds,step);
+		assertEquals(exp,res);
+	}
+});
+/*
+TestCase("Cauldron - GetTerrainBowl",{
+	"test should be defined": function(){
+		assertFunction(Algol.cauldron.getTerrainBowl);
+	},
+	"test should get right timestate": function(){
+		var terrain, states, moulds, exp, res, step = 5;
+		terrain = [{
+			1: {
+				x: 1,
+				y: 1
+			}
+		}];
+		states = {
+			5003: {
+				terrain: [[4:"sand"]]
+			}
+		};
+		moulds = {
+			
+		};
+		exp = {
+			1: {x:5,y:1}
+		};
+		res = Algol.cauldron.getUnitBowl(setup,states,moulds,step);
+		assertEquals(exp,res);
+	}
+});
+*/
