@@ -70,13 +70,16 @@ Algol = (function(){
 		if (!changes){
 			return startproperties;
 		}
-		var ret = {};
+		var ret = {}, val;
 		for(var p in startproperties){
 			ret[p] = calcPropertyValue(startproperties[p],changes[p],step);
 		}
 		for(p in changes){
 			if (!ret.hasOwnProperty(p)){
-				ret[p] = calcPropertyValue(startproperties[p],changes[p],step);
+				val = calcPropertyValue(startproperties[p],changes[p],step);
+				if (val !== undefined){
+					ret[p] = val;
+				}
 			}
 		}
 		return ret;
@@ -345,21 +348,21 @@ Algol = (function(){
 	 * @return {Array} Array of hits from correct cauldron bowl
 	 */
 	function querier2(cauldron,query,vars){
-		var ret = {}, bowl = cauldron[query.from] || cauldron, props = query.props;
+		var ret = {}, bowl = cauldron[query.from] || cauldron, props = query.props, hit;
 		for(var ykx in bowl){
-			var hit = undefined;
-			bowl[ykx].map(function(o){
+			hit = undefined;
+			(Array.isArray(bowl[ykx]) ? bowl[ykx] : [bowl[ykx]]).map(function(o){
 				for (var p in props) {
 					var ok = ((o[p] == props[p]) || (vars && vars.hasOwnProperty(props[p]) && vars[props[p]] == o[p]));
-					if (!ok && props[p].constructor == Array) {
+					if (!ok && Array.isArray(props[p])) {
 						if (vars){
 							for(var v in vars){
 								props[p].push(vars[v]);
 							}
 						}
-						ok = props[p].indexOf(o[p]) !== -1);
+						ok = props[p].indexOf(o[p]) !== -1;
 					}
-					console.log(p,props[p],o[p],alt,ok,vars,vars ? vars.hasOwnProperty(props[p]) : false);
+					//console.log(p,props[p],o[p],ok,vars,vars ? vars.hasOwnProperty(props[p]) : false);
 					if (!ok) {
 						return;
 					}
@@ -403,6 +406,18 @@ Algol = (function(){
 		return ret;
 	}
 	
+	
+	/**
+	 * Used to execute tests from various sources
+	 * @param {Object} cauldron
+	 * @param {Object} test
+	 * @param {Object} vars
+	 * @return {Array} list of objects fulfilling positions
+	 */
+	function tester2(cauldron,test,vars){
+		return querier2(cauldron,test,vars);
+	}
+	
 	/**
 	 * Used to execute tests from various sources
 	 * @param {Object} cauldron
@@ -433,6 +448,10 @@ Algol = (function(){
 		return uniqueSquares(querier(cauldron,test,vars));
 	}
 	
+	function YKX(o){
+		return o.y*1000+o.x;
+	}
+	
 	/**
 	 * Fully calculates the Units object for a given step
 	 * Used only by getCauldron
@@ -443,21 +462,37 @@ Algol = (function(){
 	 * @return {Object} An object of augmented unit objs
 	 */
 	function getUnitBowl(setup,unitstates,unitmoulds,step){
-		var units = calcCollection(setup,unitstates,step);
-		if (unitmoulds){
-			for(var uid in units){
-				var unit = units[uid];
-				if (unit.unit && unitmoulds[unit.unit]){
-					units[uid] = Object.merge(unit,unitmoulds[unit.unit]);
-				}
+		var units = calcCollection(setup,unitstates,step), ret = {};
+		
+		for(var uid in units){
+			var unit = units[uid], ykx = YKX(unit);
+			if (unitmoulds && unit.unit && unitmoulds[unit.unit]){
+				units[uid] = Object.merge(unit,unitmoulds[unit.unit]);
 			}
+			if (!ret[ykx]){
+				ret[ykx] = [];
+			}
+			ret[ykx].push(unit);
 		}
-		return units;
+		return ret;
 	}
 	
-	
+	/**
+	 * Fully calculates the terrain bowl for a given step
+	 * @param {Object} terrain The initial setup
+	 * @param {Object} shifts Terrain changes
+	 * @param {Object} terrainmoulds Optional moulds def
+	 * @param {Number} step The step to calculate to 
+	 */
 	function getTerrainBowl(terrain,shifts,terrainmoulds,step){
-		
+		var sqrs = calcCollection(terrain,shifts,step);
+		for(var ykx in sqrs){
+			var sqr = sqrs[ykx];
+			if (terrainmoulds && sqr.terrain && terrainmoulds[sqr.terrain]){
+				sqrs[ykx] = Object.merge(sqr,terrainmoulds[sqr.terrain]);
+			}
+		}
+		return sqrs;
 	}
 	
 	function collectPotentialMarks(markdefs,selectedmarks,artifacts){
@@ -467,7 +502,7 @@ Algol = (function(){
 			var markdef = markdefs[mid], markreqmet = !markdef.requiremark, reqprop;
 			if (markdef.requiremark){
 				selectedmarks.map(function(o){
-					if (o.mark = mid){
+					if (o.mark = mid){ // TODO - check this shit, is it real?
 						markreqmet = true;
 						if (markdef.requiresame){
 							reqprop = o[markdef.requiresame];
@@ -929,6 +964,7 @@ Algol = (function(){
 			tester: tester,
 			querier: querier,
 			querier2: querier2,
+			tester2: tester2,
 			getUnitBowl: getUnitBowl,
 			getTerrainBowl: getTerrainBowl
 		},

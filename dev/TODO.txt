@@ -1,0 +1,28 @@
+
+  [X] Test & query system FFS! New tester funktion!
+       [X] run single query
+       [X] run AND test
+       [X] run OR test
+       [X]Êrun test with except
+       [X] run query with flat cauldron
+       [X] multivalue props
+       [-]Ênotprops?
+       [X] vars
+       [ ] YKX reform!
+       
+  [ ]ÊT&Q dependency calculation
+  
+  [ ]ÊArtifact levels (mark/cmnd/turn)
+  
+  [ ] Command system, effect API, calculation
+
+  [ ] Mark API finalization
+ 
+  [ ]ÊBattle data object structure
+ 
+  [ ] Cauldron fetcher!
+      [X] Units
+      [ ] Marks
+      [ ] Terrain
+      [ ] AllSquares
+      [ ] Artifacts

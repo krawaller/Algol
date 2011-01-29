@@ -44,6 +44,17 @@ TestCase("CalcObject",{
 			step = undefined,
 			res = Algol.time.calcObject(startprops,changes,step);
 		assertEquals({A:"aaa",B:"bbb",C:"c"},res);
+	},
+	"test should not include future prop if no state for given step": function(){
+		var startprops = {A:"a",B:"b",C:"c"},
+			changes = {
+				A:[[1,"aa"],[3,"aaa"]],
+				B:[[2,"bb"],[5,"bbb"]],
+				E:[[10,"QQQ"]]
+			},
+			step = 4,
+			res = Algol.time.calcObject(startprops,changes,step);
+		assertEquals({A:"aaa",B:"bb",C:"c"},res);
 	}
 });
 
@@ -722,6 +733,40 @@ TestCase("Tester function",{
 	}
 });
 
+TestCase("Tester (YKX version)",{
+	"test should be defined": function(){
+		assertFunction(Algol.cauldron.tester2);
+	},
+	"test should execute single query correctly": function(){
+		var cauldron, test, vars, res, exp;
+		cauldron = {
+			hat: {
+				8003: [{
+					foo: "bar"
+				},{
+					foo: "bee"
+				}],
+				1005: [{
+					foo: "wuu"
+				}]
+			}
+		};
+		test = {
+			from: "hat",
+			props: {
+				foo: "bee"
+			}
+		};
+		exp = {
+			8003: {
+				foo: "bee"
+			}
+		};
+		res = Algol.cauldron.tester2(cauldron,test,vars);
+		assertEquals(exp,res);
+	} // TODO - finish
+});
+
 TestCase("Querier (YKX version)",{
 	"test should be defined": function(){
 		assertFunction(Algol.cauldron.querier2);
@@ -861,9 +906,31 @@ TestCase("Querier (YKX version)",{
 		vars = {
 			"CURRENTPLAYER":2
 		};
-		console.log("LOOK NOW LOOK NOW! :)");
 		res = Algol.cauldron.querier2(bowl,query,vars);
-		console.log(res);
+		assertEquals(exp,res);
+	},
+	"test should handle bowl with single-value YKX entry": function(){
+		var bowl, query, res, exp, vars;
+		bowl = {
+			8003: {
+				foo: 2
+			}
+		};
+		query = {
+			from: "hat",
+			props: {
+				foo: ["boo","CURRENTPLAYER"]
+			}
+		};
+		exp = {
+			8003: {
+				foo: 2
+			}
+		};
+		vars = {
+			"CURRENTPLAYER":2
+		};
+		res = Algol.cauldron.querier2(bowl,query,vars);
 		assertEquals(exp,res);
 	}
 });
@@ -969,7 +1036,7 @@ TestCase("Querier",{
 	}
 });
 
-/*
+
 TestCase("Cauldron - GetUnitBowl",{
 	"test should be defined": function(){
 		assertFunction(Algol.cauldron.getUnitBowl);
@@ -991,7 +1058,7 @@ TestCase("Cauldron - GetUnitBowl",{
 		moulds = {
 			
 		};
-		exp = [{uid:1,x:5,y:1}];
+		exp = {1005:[{uid:1,x:5,y:1}]};
 		res = Algol.cauldron.getUnitBowl(setup,states,moulds,step);
 		assertEquals(exp,res);
 	},
@@ -1015,37 +1082,69 @@ TestCase("Cauldron - GetUnitBowl",{
 				bar: "baz"
 			}
 		};
-		exp = [{uid:1,x:5,y:1,unit:"foo",bar:"baz"}];
+		exp = {
+			1005: [{
+				uid: 1,
+				x: 5,
+				y: 1,
+				unit: "foo",
+				bar: "baz"
+			}]
+		};
 		res = Algol.cauldron.getUnitBowl(setup,states,moulds,step);
 		assertEquals(exp,res);
 	}
-});*/
-/*
+});
+
 TestCase("Cauldron - GetTerrainBowl",{
 	"test should be defined": function(){
 		assertFunction(Algol.cauldron.getTerrainBowl);
 	},
 	"test should get right timestate": function(){
 		var terrain, states, moulds, exp, res, step = 5;
-		terrain = [{
-			1: {
+		terrain = {
+			1001: {
 				x: 1,
-				y: 1
+				y: 1,
+				foo: "bar"
 			}
-		}];
-		states = {
-			5003: {
-				terrain: [[4:"sand"]]
+		};
+		shifts = {
+			1001: {
+				foo: [[4,"baz"]]
+			}
+		};
+		moulds = {};
+		exp = {
+			1001: {x:1,y:1,foo:"baz"}
+		};
+		res = Algol.cauldron.getTerrainBowl(terrain,shifts,moulds,step);
+		assertEquals(exp,res);
+	},
+	"test should augment props from mould if appropriate": function(){
+		var terrain, states, moulds, exp, res, step = 5;
+		terrain = {
+			1001: {
+				x: 1,
+				y: 1,
+				terrain: "meadow"
+			}
+		};
+		shifts = {
+			1001: {
+				terrain: [[4,"forest"]]
 			}
 		};
 		moulds = {
-			
+			forest: {
+				trees: "a lot"
+			}
 		};
 		exp = {
-			1: {x:5,y:1}
+			1001: {x:1,y:1,terrain:"forest",trees:"a lot"}
 		};
-		res = Algol.cauldron.getUnitBowl(setup,states,moulds,step);
+		res = Algol.cauldron.getTerrainBowl(terrain,shifts,moulds,step);
 		assertEquals(exp,res);
 	}
 });
-*/
+
