@@ -787,7 +787,7 @@ TestCase("MeldObjects",{
 
 TestCase("Tester (YKX version)",{
 	"test should be defined": function(){
-		assertFunction(Algol.cauldron.tester2);
+		assertFunction(Algol.cauldron.tester);
 	},
 	"test should execute single query correctly": function(){
 		var cauldron, test, vars, res, exp;
@@ -814,7 +814,7 @@ TestCase("Tester (YKX version)",{
 				foo: "bee"
 			}
 		};
-		res = Algol.cauldron.tester2(cauldron,test,vars);
+		res = Algol.cauldron.tester(cauldron,test,vars);
 		assertEquals(exp,res);
 	},
 	"test should run normal AND test properly": function(){
@@ -854,7 +854,7 @@ TestCase("Tester (YKX version)",{
 				foo: ["wuu","wee"]
 			}
 		};
-		res = Algol.cauldron.tester2(cauldron,test,{});
+		res = Algol.cauldron.tester(cauldron,test,{});
 		assertEquals(exp,res);
 	},
 	"test should run honour except test": function(){
@@ -895,14 +895,14 @@ TestCase("Tester (YKX version)",{
 				foo: "bar"
 			}
 		};
-		res = Algol.cauldron.tester2(cauldron,test,{});
+		res = Algol.cauldron.tester(cauldron,test,{});
 		assertEquals(exp,res);
 	}
 });
 
 TestCase("Querier (YKX version)",{
 	"test should be defined": function(){
-		assertFunction(Algol.cauldron.querier2);
+		assertFunction(Algol.cauldron.querier);
 	},
 	"test should return array of objects with unique positions that fulfil the props reqs": function(){
 		var cauldron, query, res, exp;
@@ -929,7 +929,7 @@ TestCase("Querier (YKX version)",{
 				foo: "bee"
 			}
 		};
-		res = Algol.cauldron.querier2(cauldron,query);
+		res = Algol.cauldron.querier(cauldron,query);
 		assertEquals(exp,res);
 	},
 	"test should handle being give bowl straight instead of cauldron": function(){
@@ -955,7 +955,7 @@ TestCase("Querier (YKX version)",{
 				foo: "bee"
 			}
 		};
-		res = Algol.cauldron.querier2(bowl,query);
+		res = Algol.cauldron.querier(bowl,query);
 		assertEquals(exp,res);
 	},
 	"test should handle multiple possible values in props": function(){
@@ -981,7 +981,7 @@ TestCase("Querier (YKX version)",{
 				foo: "bee"
 			}
 		};
-		res = Algol.cauldron.querier2(bowl,query);
+		res = Algol.cauldron.querier(bowl,query);
 		assertEquals(exp,res);
 	},
 	"test should handle variables": function(){
@@ -1010,7 +1010,7 @@ TestCase("Querier (YKX version)",{
 		vars = {
 			"CURRENTPLAYER":2
 		};
-		res = Algol.cauldron.querier2(bowl,query,vars);
+		res = Algol.cauldron.querier(bowl,query,vars);
 		assertEquals(exp,res);
 	},
 	"test should handle variables in array of multiple values": function(){
@@ -1039,7 +1039,7 @@ TestCase("Querier (YKX version)",{
 		vars = {
 			"CURRENTPLAYER":2
 		};
-		res = Algol.cauldron.querier2(bowl,query,vars);
+		res = Algol.cauldron.querier(bowl,query,vars);
 		assertEquals(exp,res);
 	},
 	"test should handle bowl with single-value YKX entry": function(){
@@ -1063,7 +1063,7 @@ TestCase("Querier (YKX version)",{
 		vars = {
 			"CURRENTPLAYER":2
 		};
-		res = Algol.cauldron.querier2(bowl,query,vars);
+		res = Algol.cauldron.querier(bowl,query,vars);
 		assertEquals(exp,res);
 	},
 	"test should meld objects if more than 1 fulfil query": function(){
@@ -1097,7 +1097,7 @@ TestCase("Querier (YKX version)",{
 				foo: "bee"
 			}
 		};
-		res = Algol.cauldron.querier2(bowl,query);
+		res = Algol.cauldron.querier(bowl,query);
 		assertEquals(exp,res);
 	}
 });

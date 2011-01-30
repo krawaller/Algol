@@ -204,7 +204,7 @@ Algol = (function(){
 			aid: def.aid
 		};
 		for(var ykx in where){
-			ret[ykx] = meldObjects(where[ykx],mould);
+			ret[ykx] = Object.merge(mould,where[ykx]);
 		}
 		return ret;
 	}
@@ -293,7 +293,7 @@ Algol = (function(){
 	 * @param {Object} vars
 	 * @return {Object} Object with per-ykx-melded objects
 	 */
-	function querier2(cauldron,query,vars){
+	function querier(cauldron,query,vars){
 		var ret = {}, bowl = cauldron[query.from] || cauldron, props = query.props, found, meld;
 		for(var ykx in bowl){
 			found = false;
@@ -329,11 +329,11 @@ Algol = (function(){
 	
 	/**
 	 * Walks through the array of query results, and sees which pos are present in every result
-	 * Used in tester2
+	 * Used in tester
 	 * @param {Object} array of queryresult objects
 	 * @return {Object} object with melded objects for all common ykx
 	 */
-	function findCommonPos2(list){
+	function findCommonPos(list){
 		var hits = list.pop();
 		list.map(function(res){
 			for(var ykx in hits){
@@ -355,16 +355,16 @@ Algol = (function(){
 	 * @param {Object} vars
 	 * @return {Object} resultobject
 	 */
-	function tester2(cauldron,test,vars){
+	function tester(cauldron,test,vars){
 		// complex test, run through list
 		var results = [], ret, except;
 		if (test.tests){
 			test.tests.map(function(t){
-				results.push(tester2(cauldron,t,vars));
+				results.push(tester(cauldron,t,vars));
 			});
-			ret = findCommonPos2(results);
+			ret = findCommonPos(results);
 			if (test.except){
-				except = tester2(cauldron,test.except,vars);
+				except = tester(cauldron,test.except,vars);
 				for(var ykx in except){
 					delete ret[ykx];
 				}
@@ -372,7 +372,7 @@ Algol = (function(){
 			return ret;
 		}
 		// single query, perform and return result
-		return querier2(cauldron,test,vars);
+		return querier(cauldron,test,vars);
 	}
 
 	
@@ -437,8 +437,8 @@ Algol = (function(){
 			calcCollection: calcCollection
 		},
 		cauldron: {
-			querier2: querier2,
-			tester2: tester2,
+			querier: querier,
+			tester: tester,
 			getUnitBowl: getUnitBowl,
 			getTerrainBowl: getTerrainBowl
 		},
