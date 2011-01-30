@@ -340,6 +340,27 @@ Algol = (function(){
 	}
 	
 	/**
+	 * Melds 2 objects together. If common prop with different value, makes array.
+	 * @param {Object} o1
+	 * @param {Object} o2
+	 * @return {Object} Melded object
+	 */
+	function meldObjects(o1,o2){
+		var ret = {};
+		[o1,o2].map(function(o){
+			for(var p in o){
+				if (ret.hasOwnProperty(p) && ret[p] !== o[p]) {
+					ret[p] = [].concat(ret[p]).concat(o[p]);
+				}
+				else {
+					ret[p] = o[p];
+				}
+			}
+		});
+		return ret;
+	}
+	
+	/**
 	 * Walks through a list of objects and returns matches to property obj
 	 * Used by tester and artifact functions
 	 * @param {Object} cauldron
@@ -348,9 +369,10 @@ Algol = (function(){
 	 * @return {Array} Array of hits from correct cauldron bowl
 	 */
 	function querier2(cauldron,query,vars){
-		var ret = {}, bowl = cauldron[query.from] || cauldron, props = query.props, hit;
+		var ret = {}, bowl = cauldron[query.from] || cauldron, props = query.props, found, meld;
 		for(var ykx in bowl){
-			hit = undefined;
+			found = false;
+			meld = {};
 			(Array.isArray(bowl[ykx]) ? bowl[ykx] : [bowl[ykx]]).map(function(o){
 				for (var p in props) {
 					var ok = ((o[p] == props[p]) || (vars && vars.hasOwnProperty(props[p]) && vars[props[p]] == o[p]));
@@ -368,11 +390,12 @@ Algol = (function(){
 					}
 				}
 				if (ok){
-					hit = o;
+					found = true;
+					meld = Algol.utils.meldObjects(meld,o);
 				}
 			});
-			if (hit){
-				ret[ykx] = hit;
+			if (found){
+				ret[ykx] = meld;
 			}
 		}
 		return ret;
@@ -415,6 +438,16 @@ Algol = (function(){
 	 * @return {Array} list of objects fulfilling positions
 	 */
 	function tester2(cauldron,test,vars){
+		// complex test, run through list
+		var lists = [], ret;
+		if (test.tests){
+			test.tests.map(function(t){
+				lists.push(tester2(cauldron,t,vars));
+			});
+			ret = []; // TODO - finish
+			return ret;
+		}
+		// single query, perform and return result
 		return querier2(cauldron,test,vars);
 	}
 	
@@ -952,7 +985,8 @@ Algol = (function(){
 			moveInDir: moveInDir,
 			dirRelativeTo: dirRelativeTo,
 			collectPotentialMarks: collectPotentialMarks,
-			collectPotentialCommands: collectPotentialCommands
+			collectPotentialCommands: collectPotentialCommands,
+			meldObjects: meldObjects
 		},
 		time: {
 			calcPropertyValue: calcPropertyValue,

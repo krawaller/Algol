@@ -733,6 +733,81 @@ TestCase("Tester function",{
 	}
 });
 
+TestCase("MeldObjects",{
+	"test should be defined": function(){
+		assertFunction(Algol.utils.meldObjects);
+	},
+	"test should meld objects with different props": function(){
+		var o1, o1, res, exp;
+		o1 = {
+			foo:"bar"
+		};
+		o2 = {
+			baz:"biz"
+		};
+		exp = {
+			foo: "bar",
+			baz: "biz"
+		};
+		res = Algol.utils.meldObjects(o1,o2);
+		assertEquals(exp,res);
+	},
+	"test should retain 1 version of duplicate prop with same value": function(){
+		var o1, o1, res, exp;
+		o1 = {
+			foo:"bar",
+			x:5
+		};
+		o2 = {
+			baz:"biz",
+			x:5
+		};
+		exp = {
+			foo: "bar",
+			baz: "biz",
+			x:5
+		};
+		res = Algol.utils.meldObjects(o1,o2);
+		assertEquals(exp,res);
+	},
+	"test should make array for same props with different values": function(){
+		var o1, o1, res, exp;
+		o1 = {
+			foo:"bar",
+			x:5
+		};
+		o2 = {
+			baz:"biz",
+			x:7
+		};
+		exp = {
+			foo: "bar",
+			baz: "biz",
+			x:[5,7]
+		};
+		res = Algol.utils.meldObjects(o1,o2);
+		assertEquals(exp,res);
+	},
+	"test should extend array for same prop if 1st is already array": function(){
+		var o1, o1, res, exp;
+		o1 = {
+			foo:"bar",
+			x:[5,7]
+		};
+		o2 = {
+			baz:"biz",
+			x:8
+		};
+		exp = {
+			foo: "bar",
+			baz: "biz",
+			x:[5,7,8]
+		};
+		res = Algol.utils.meldObjects(o1,o2);
+		assertEquals(exp,res);
+	}
+});
+
 TestCase("Tester (YKX version)",{
 	"test should be defined": function(){
 		assertFunction(Algol.cauldron.tester2);
@@ -764,7 +839,47 @@ TestCase("Tester (YKX version)",{
 		};
 		res = Algol.cauldron.tester2(cauldron,test,vars);
 		assertEquals(exp,res);
-	} // TODO - finish
+	},
+	"test should run normal AND test properly": function(){
+		var cauldron, test, query1, query2, res, exp;
+		cauldron = {
+			hat: {
+				8003: [{
+					foo: "bar"
+				},{
+					foo: "bee"
+				}],
+				1005: [{
+					foo: "wuu"
+				}]
+			},
+			cat: {
+				1005: {
+					foo: "wuu"
+				}
+			}
+		};
+		test = {
+			tests: [{
+				from: "hat",
+				props: {
+					"foo":"wuu"
+				}
+			},{
+				from: "cat",
+				props: {
+					"foo":"wuu"
+				}
+			}]
+		};
+		exp = {
+			1005: {
+				foo: "wuu"
+			}
+		};
+		res = Algol.cauldron.tester2(cauldron,test,{});
+	//	assertEquals(exp,res);
+	}
 });
 
 TestCase("Querier (YKX version)",{
@@ -931,6 +1046,40 @@ TestCase("Querier (YKX version)",{
 			"CURRENTPLAYER":2
 		};
 		res = Algol.cauldron.querier2(bowl,query,vars);
+		assertEquals(exp,res);
+	},
+	"test should meld objects if more than 1 fulfil query": function(){
+		var bowl, query, res, exp;
+		bowl = {
+			8003: [{
+				foo: "bee",
+				what: "bah"
+			}, {
+				foo: "bee",
+				what: "guh",
+				x: 666
+			}],
+			1005: [{
+				foo: "bee"
+			}]
+		};
+		query = {
+			from: "hat",
+			props: {
+				foo: "bee"
+			}
+		};
+		exp = {
+			8003: {
+				foo: "bee",
+				what: ["bah","guh"],
+				x: 666
+			},
+			1005: {
+				foo: "bee"
+			}
+		};
+		res = Algol.cauldron.querier2(bowl,query);
 		assertEquals(exp,res);
 	}
 });
