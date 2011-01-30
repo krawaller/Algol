@@ -1,12 +1,16 @@
               
-  [ ] T&Q YKX reform v2.0
+  [/] T&Q YKX reform v2.0
        [X] redo querier
        [X] redo tester
-       [ ] redo walker
-       [ ] redo offset
-       [ ] redo spawn
-       [ ] remove old t&q + related code
+       [X] redo walker
+       [X] redo offset
+       [X] redo spawn
+       [X] remove old t&q + related code
+       [ ]Êlook through castle & daggers for eventual changes
        
+  [ ] testbuilder (gamedef and testdef, returns recursive testobj expected by tester function)
+       
+  [ ]ÊArtifact generation (customize, dependencies with previous marks, blah)
        
   [ ]ÊT&Q dependency calculation
   
@@ -18,7 +22,7 @@
  
   [ ]ÊBattle data object structure
  
-  [ ] Cauldron fetcher!
+  [ ] Cauldron fetcher! (with ykx2.0 structure)
       [X] Units
       [ ] Marks
       [X] Terrain

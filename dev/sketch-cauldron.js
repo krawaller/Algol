@@ -22,6 +22,13 @@ CAULDRON = {
 	}
 };
 
+TESTRESULT = {
+	ykx: {
+		// melded properties from all objects at position from bowls included in test
+	} // , ...
+};
+
+
 /********
  * 
  *   meldobject! sameprop different vals means array
@@ -29,8 +36,9 @@ CAULDRON = {
  *   Query: meld all matching objects.
  * 
  *   AND-test: if ykx in all lists fulfilled test, return melded obj 
- *   OR-test: if ykx from any list fulfilled test, return melded obj. Bah! Ignore?
+ *   OR-test: if ykx from any list fulfilled test, return melded obj. Bah! Ignore? Leave for now.
  * 
+ *   Artifact: works on TESTRESULT objects. TODO - meld or merge to create artifact?
  * 
  * 
  */
