@@ -738,7 +738,7 @@ TestCase("MeldObjects",{
 		assertFunction(Algol.utils.meldObjects);
 	},
 	"test should meld objects with different props": function(){
-		var o1, o1, res, exp;
+		var o1, o2, res, exp;
 		o1 = {
 			foo:"bar"
 		};
@@ -753,7 +753,7 @@ TestCase("MeldObjects",{
 		assertEquals(exp,res);
 	},
 	"test should retain 1 version of duplicate prop with same value": function(){
-		var o1, o1, res, exp;
+		var o1, o2, res, exp;
 		o1 = {
 			foo:"bar",
 			x:5
@@ -771,7 +771,7 @@ TestCase("MeldObjects",{
 		assertEquals(exp,res);
 	},
 	"test should make array for same props with different values": function(){
-		var o1, o1, res, exp;
+		var o1, o2, res, exp;
 		o1 = {
 			foo:"bar",
 			x:5
@@ -789,7 +789,7 @@ TestCase("MeldObjects",{
 		assertEquals(exp,res);
 	},
 	"test should extend array for same prop if 1st is already array": function(){
-		var o1, o1, res, exp;
+		var o1, o2, res, exp;
 		o1 = {
 			foo:"bar",
 			x:[5,7]
@@ -850,7 +850,7 @@ TestCase("Tester (YKX version)",{
 					foo: "bee"
 				}],
 				1005: [{
-					foo: "wuu"
+					foo: "wee"
 				}]
 			},
 			cat: {
@@ -863,22 +863,63 @@ TestCase("Tester (YKX version)",{
 			tests: [{
 				from: "hat",
 				props: {
-					"foo":"wuu"
+					foo:["wee","bee"]
 				}
 			},{
 				from: "cat",
 				props: {
-					"foo":"wuu"
+					foo:"wuu"
 				}
 			}]
 		};
 		exp = {
 			1005: {
-				foo: "wuu"
+				foo: ["wuu","wee"]
 			}
 		};
 		res = Algol.cauldron.tester2(cauldron,test,{});
-	//	assertEquals(exp,res);
+		assertEquals(exp,res);
+	},
+	"test should run honour except test": function(){
+		var cauldron, test, res, exp;
+		cauldron = {
+			hat: {
+				8003: [{
+					foo: "bar"
+				},{
+					foo: "bee"
+				}],
+				1005: [{
+					foo: "wee"
+				}]
+			},
+			cat: {
+				1005: {
+					foo: "wuu"
+				}
+			}
+		};
+		test = {
+			tests: [{
+				from: "hat",
+				props: {
+					foo:["bar","wee"]
+				}
+			}],
+			except: {
+				from: "cat",
+				props: {
+					foo: "wuu"
+				}
+			}
+		};
+		exp = {
+			8003: {
+				foo: "bar"
+			}
+		};
+		res = Algol.cauldron.tester2(cauldron,test,{});
+		assertEquals(exp,res);
 	}
 });
 

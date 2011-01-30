@@ -284,6 +284,8 @@ Algol = (function(){
 		});
 		return ret;
 	}
+	
+	
 	/**
 	 * Finds all positions occuring in every list
 	 * Used only in tester
@@ -320,7 +322,7 @@ Algol = (function(){
 	
 	/**
 	 * merges all same-pos objects in a list, so only has unique positions
-	 * Used only in Tester 
+	 * Used only in Tester for OR-tests
 	 * @param {Object} list 
 	 * @return {Array} List of objects with unique positions
 	 */
@@ -366,7 +368,7 @@ Algol = (function(){
 	 * @param {Object} cauldron
 	 * @param {Object} query
 	 * @param {Object} vars
-	 * @return {Array} Array of hits from correct cauldron bowl
+	 * @return {Object} Object with per-ykx-melded objects
 	 */
 	function querier2(cauldron,query,vars){
 		var ret = {}, bowl = cauldron[query.from] || cauldron, props = query.props, found, meld;
@@ -390,8 +392,8 @@ Algol = (function(){
 					}
 				}
 				if (ok){
+					meld = found ? Algol.utils.meldObjects(meld,o) : o;
 					found = true;
-					meld = Algol.utils.meldObjects(meld,o);
 				}
 			});
 			if (found){
@@ -429,22 +431,48 @@ Algol = (function(){
 		return ret;
 	}
 	
+	/**
+	 * Walks through the array of query results, and sees which pos are present in every result
+	 * Used in tester2
+	 * @param {Object} array of queryresult objects
+	 * @return {Object} object with melded objects for all common ykx
+	 */
+	function findCommonPos2(list){
+		var hits = list.pop(), found = false;
+		list.map(function(res){
+			for(var ykx in hits){
+				if (res[ykx]){
+					hits[ykx] = meldObjects(hits[ykx],res[ykx]);
+				}
+				else {
+					delete hits[ykx];
+				}
+			}
+		});
+		return hits;
+	}
 	
 	/**
 	 * Used to execute tests from various sources
 	 * @param {Object} cauldron
 	 * @param {Object} test
 	 * @param {Object} vars
-	 * @return {Array} list of objects fulfilling positions
+	 * @return {Object} resultobject
 	 */
 	function tester2(cauldron,test,vars){
 		// complex test, run through list
-		var lists = [], ret;
+		var results = [], ret, except;
 		if (test.tests){
 			test.tests.map(function(t){
-				lists.push(tester2(cauldron,t,vars));
+				results.push(tester2(cauldron,t,vars));
 			});
-			ret = []; // TODO - finish
+			ret = findCommonPos2(results);
+			if (test.except){
+				except = tester2(cauldron,test.except,vars);
+				for(var ykx in except){
+					delete ret[ykx];
+				}
+			}
 			return ret;
 		}
 		// single query, perform and return result

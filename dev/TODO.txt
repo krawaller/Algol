@@ -1,14 +1,12 @@
-
-  [X] Test & query system FFS! New tester funktion!
-       [X] run single query
-       [X] run AND test
-       [X] run OR test
-       [X]Êrun test with except
-       [X] run query with flat cauldron
-       [X] multivalue props
-       [-]Ênotprops?
-       [X] vars
-       [ ] YKX reform!
+              
+  [ ] T&Q YKX reform v2.0
+       [X] redo querier
+       [X] redo tester
+       [ ] redo walker
+       [ ] redo offset
+       [ ] redo spawn
+       [ ] remove old t&q + related code
+       
        
   [ ]ÊT&Q dependency calculation
   
@@ -23,6 +21,6 @@
   [ ] Cauldron fetcher!
       [X] Units
       [ ] Marks
-      [ ] Terrain
+      [X] Terrain
       [ ] AllSquares
       [ ] Artifacts
