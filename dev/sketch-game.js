@@ -110,7 +110,7 @@ GAME = { // versionspecific object?
 	tests: {
 		TESTID: {
 			tests: [T,T],
-			or: BOOLEAN,
+			or: BOOLEAN, // naaaah
 			except: T
 		}
 	},

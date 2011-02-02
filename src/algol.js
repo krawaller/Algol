@@ -7,12 +7,22 @@ Algol = (function(){
 	 * @return {Array} Single array
 	 */
 	Array.flatten = function(arrs){
-		ret = [];
+		var ret = [];
 		arrs.map(function(arr){
 			ret = ret.concat(arr);
 		});
 		return ret;
 	};
+	
+	Array.unique = function(arr){
+		var ret = [];
+		arr.map(function(el){
+			if (ret.indexOf(el) === -1){
+				ret.push(el);
+			}
+		});
+		return ret;
+	}
 	
 	/**
 	 * Merges all given objects, property precedence from left
@@ -286,6 +296,32 @@ Algol = (function(){
 	}
 	
 	/**
+	 * Returns true if all props values can be found in o
+	 * @param {Object} o Object to test
+	 * @param {Object} props Properties to compare with
+	 * @param {Object} vars Special variables to substitute
+	 * @return {Boolean} Whether or not test was successful
+	 */
+	function testForPropsInObject(o,props,vars){
+		var ok;
+		for (var p in props) {
+			ok = ((o[p] == props[p]) || (vars && vars.hasOwnProperty(props[p]) && vars[props[p]] == o[p]));
+			if (!ok && Array.isArray(props[p])) {
+				if (vars) {
+					for (var v in vars) {
+						props[p].push(vars[v]);
+					}
+				}
+				ok = props[p].indexOf(o[p]) !== -1;
+			}
+			if (!ok) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
 	 * Walks through a list of objects and returns matches to property obj
 	 * Used by tester and artifact functions
 	 * @param {Object} cauldron
@@ -299,22 +335,7 @@ Algol = (function(){
 			found = false;
 			meld = {};
 			(Array.isArray(bowl[ykx]) ? bowl[ykx] : [bowl[ykx]]).map(function(o){
-				for (var p in props) {
-					var ok = ((o[p] == props[p]) || (vars && vars.hasOwnProperty(props[p]) && vars[props[p]] == o[p]));
-					if (!ok && Array.isArray(props[p])) {
-						if (vars){
-							for(var v in vars){
-								props[p].push(vars[v]);
-							}
-						}
-						ok = props[p].indexOf(o[p]) !== -1;
-					}
-					//console.log(p,props[p],o[p],ok,vars,vars ? vars.hasOwnProperty(props[p]) : false);
-					if (!ok) {
-						return;
-					}
-				}
-				if (ok){
+				if (testForPropsInObject(o,props,vars)){
 					meld = found ? Algol.utils.meldObjects(meld,o) : o;
 					found = true;
 				}
@@ -424,6 +445,48 @@ Algol = (function(){
 	}
 	
 	
+	/**
+	 * Returns a dependency object for a given testid.
+	 * @param {Object} game The game definition object, containing test and query defs
+	 * @param {Object} testid The id of test to calculate dependencies for
+	 * @param {Object} calculatedtestdeps Object with already calculated test dependencies
+	 * @return {Object} An object with info on the dependencies for the test
+	 */
+	function calculateDepsForTest(game,testid,calculatedtestdeps){
+		var test = game.tests[testid],
+			othertestdep,
+			uses = test.tests.concat(test.except || []),
+			deps = {
+				tests: [],
+				queries: [],
+				bowls: {}
+			};
+		calculatedtestdeps = calculatedtestdeps || {};
+		uses.map(function(depid){
+			// query dependency
+			if (game.queries[depid] && deps.queries.indexOf(depid) === -1){
+				deps.queries.push(depid);
+				deps.bowls[game.queries[depid].from] = true;
+			}
+			// test dependency
+			else if (deps.tests.indexOf(depid) === -1){
+				othertestdep = calculatedtestdeps[depid] || calculateDepsForTest(game,depid,calculatedtestdeps);
+				deps.tests.push(depid);
+				deps.queries = Array.unique(deps.queries.concat(othertestdep.queries));
+				for(var b in othertestdep.bowls){
+					deps.bowls[b] = true;
+				}
+			}
+		});
+		return deps;
+	}
+	
+	
+	function calculateDepsForTests(game){
+		
+	}
+	
+	
 	// Expose
 	return {
 		utils: {
@@ -435,6 +498,10 @@ Algol = (function(){
 			calcPropertyValue: calcPropertyValue,
 			calcObject: calcObject,
 			calcCollection: calcCollection
+		},
+		compile: {
+			calculateDepsForTest: calculateDepsForTest,
+			calculateDepsForTests: calculateDepsForTests
 		},
 		cauldron: {
 			querier: querier,

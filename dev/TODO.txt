@@ -28,3 +28,5 @@
       [X] Terrain
       [ ] AllSquares
       [ ] Artifacts
+      
+  [Ê]ÊGhost concept? Hmm. Think through some more. Feature creep! :)

@@ -1215,3 +1215,81 @@ TestCase("Cauldron - GetTerrainBowl",{
 	}
 });
 
+TestCase("calculateDepsForTest",{
+	"test should be defined": function(){
+		assertFunction(Algol.compile.calculateDepsForTest);
+	},
+	"test should calc dependency for queries correctly": function(){
+		var exp, res, game = {
+			queries: {
+				carquery: {from:"cars"}
+			},
+			tests: {
+				vehicletest: {
+					tests: ["carquery"]
+				}
+			}
+		};
+		exp = {
+			queries: ["carquery"],
+			tests: [],
+			bowls: {
+				cars: true
+			}
+		};
+		res = Algol.compile.calculateDepsForTest(game,"vehicletest");
+		assertEquals(exp,res);
+	},
+	"test should include except query": function(){
+		var exp, res, game = {
+			queries: {
+				allboatquery: {from:"boats"},
+				rowboatquery: {from:"boats"}
+			},
+			tests: {
+				motorboattest: {
+					tests: ["allboatquery"],
+					except: "rowboatquery"
+				}
+			}
+		};
+		exp = {
+			queries: ["allboatquery","rowboatquery"],
+			tests: [],
+			bowls: {
+				boats: true
+			}
+		};
+		res = Algol.compile.calculateDepsForTest(game,"motorboattest");
+		assertEquals(exp,res);
+	}
+	,
+	"test should handle test dependency": function(){
+		var exp, res, game = {
+			queries: {
+				allboatquery: {from:"boats"},
+				rowboatquery: {from:"boats"},
+				carquery: {from:"cars"}
+			},
+			tests: {
+				motorboattest: {
+					tests: ["allboatquery"],
+					except: "rowboatquery"
+				},
+				vehicletest: {
+					tests: ["carquery","motorboattest"]
+				}
+			}
+		};
+		exp = {
+			queries: ["carquery","allboatquery","rowboatquery"],
+			tests: ["motorboattest"],
+			bowls: {
+				cars: true,
+				boats: true
+			}
+		};
+		res = Algol.compile.calculateDepsForTest(game,"vehicletest");
+		assertEquals(exp,res);
+	}
+});
