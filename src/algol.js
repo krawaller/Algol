@@ -2,7 +2,7 @@ Algol = (function(){
 	
 	/**
 	 * Flattens a list of arrays into a single array
-	 * Used by tester
+	 * Currently not used anywhere
 	 * @param {Array} Array of arrays to flatten
 	 * @return {Array} Single array
 	 */
@@ -14,6 +14,12 @@ Algol = (function(){
 		return ret;
 	};
 	
+	/**
+	 * Removes all duplicate elements from array
+	 * Used by dependency calculation
+	 * @param {Array} Array of items to work on
+	 * @return {Array} Array with unique items
+	 */
 	Array.unique = function(arr){
 		var ret = [];
 		arr.map(function(el){
@@ -22,7 +28,7 @@ Algol = (function(){
 			}
 		});
 		return ret;
-	}
+	};
 	
 	/**
 	 * Merges all given objects, property precedence from left
@@ -66,7 +72,8 @@ Algol = (function(){
 				return changes[i][1];
 			}
 		}
-	}
+		throw "What the heck, no value found!";
+	};
 	
 	/**
 	 * Calculates startvalues and changes for a single object into a given time state
@@ -97,7 +104,7 @@ Algol = (function(){
 	
 	/**
 	 * Takes a set of startvalues and changes, and calculates state for a given time
-	 * Used by cauldron filler
+	 * Used by cauldron fillers (Unit and Terrain)
 	 * @param {Object} startset Object with starting conditions
 	 * @param {Object} changeset Object with changes per property per object
 	 * @param {Number} step Which step to calculate to 
@@ -178,7 +185,7 @@ Algol = (function(){
 	 * @param {Object} def Offset definition object from game 
 	 * @param {Array} starts Testerresultlist of matching squares
 	 * @param {Object} boarddims Object with board dimensions (and maybe kind)
-	 * @return {Array} list of created artifacts
+	 * @return {Object} ykx object of created artifacts
 	 */
 	function offset(def,starts,boarddims){
 		var start,ret = {}, mould = {
@@ -223,11 +230,11 @@ Algol = (function(){
 	 * Walker main utility function
 	 * Called only from doWalker function
 	 * @param {Object} def Definition object from game
-	 * @param {Array} starts Testerresultlist of matching squares
-	 * @param {Array} stops Testerresultlist of matching squares
+	 * @param {Object} starts ykx Testerresultobject of matching squares
+	 * @param {Object} stops ykx Testerresultobject of matching squares
 	 * @param {Object} boarddims Object with board dimensions (and maybe kind)
-	 * @param {Array} steps Optional Testerresultlist of matching squares 
-	 * @return {Array} list Array of created artifacts
+	 * @param {Object} steps Optional ykx Testerresultobject of matching squares 
+	 * @return {Object} ykx object of created artifacts
 	 */
 	function walker(def,starts,stops,boarddims,steps){
 		var ret = {}, o, start;
@@ -297,6 +304,7 @@ Algol = (function(){
 	
 	/**
 	 * Returns true if all props values can be found in o
+	 * Used by querier
 	 * @param {Object} o Object to test
 	 * @param {Object} props Properties to compare with
 	 * @param {Object} vars Special variables to substitute
@@ -324,7 +332,7 @@ Algol = (function(){
 	/**
 	 * Walks through a list of objects and returns matches to property obj
 	 * Used by tester and artifact functions
-	 * @param {Object} cauldron
+	 * @param {Object} cauldron Cauldron or bowl
 	 * @param {Object} query
 	 * @param {Object} vars
 	 * @return {Object} Object with per-ykx-melded objects
@@ -349,7 +357,7 @@ Algol = (function(){
 	
 	
 	/**
-	 * Walks through the array of query results, and sees which pos are present in every result
+	 * Walks through the array of query results, and sees which pos are present in every result (AND test)
 	 * Used in tester
 	 * @param {Object} array of queryresult objects
 	 * @return {Object} object with melded objects for all common ykx
@@ -370,6 +378,22 @@ Algol = (function(){
 	}
 	
 	/**
+	 * Walks through the array of query results, and melts all positions together (OR test)
+	 * Used in tester
+	 * @param {Object} list Array of queryresult objects
+	 * @return Object object with melded objects for all ykx
+	 */
+	function findAllPos(list){
+		var hits = list.pop();
+		list.forEach(function(res){
+			for(var ykx in res){
+				hits[ykx] = hits.hasOwnProperty(ykx) ? meldObjects(hits[ykx],res[ykx]) : res[ykx];
+			}
+		});
+		return hits;
+	}
+	
+	/**
 	 * Used to execute tests from various sources
 	 * @param {Object} cauldron
 	 * @param {Object} test
@@ -377,13 +401,13 @@ Algol = (function(){
 	 * @return {Object} resultobject
 	 */
 	function tester(cauldron,test,vars){
-		// complex test, run through list
 		var results = [], ret, except;
+		// complex test, run through list
 		if (test.tests){
 			test.tests.map(function(t){
 				results.push(tester(cauldron,t,vars));
 			});
-			ret = findCommonPos(results);
+			ret = test.or ? findAllPos(results) : findCommonPos(results);
 			if (test.except){
 				except = tester(cauldron,test.except,vars);
 				for(var ykx in except){
@@ -446,6 +470,27 @@ Algol = (function(){
 	
 	
 	/**
+	 * Generates object with one entry per boardsquare, keyed with YKX
+	 * @param {Object} boarddims Object with board width and height
+	 * @return {Object} object with squareobjs
+	 */
+	function getAllSquaresBowl(boarddims){
+		var ret = {};
+		for(var y = 1; y<=boarddims.height;y++){
+			for(var x = 1; x<=boarddims.width;x++){
+				ret[y*1000+x] = {
+					y: y,
+					x: x,
+					colour: ["white","black"][(x+(y%2))%2] 
+				};
+			}
+		}
+		return ret;
+	}
+	
+	
+	
+	/**
 	 * Returns a dependency object for a given testid.
 	 * @param {Object} game The game definition object, containing test and query defs
 	 * @param {Object} testid The id of test to calculate dependencies for
@@ -478,13 +523,109 @@ Algol = (function(){
 				}
 			}
 		});
+		calculatedtestdeps[testid] = deps;
 		return deps;
 	}
 	
 	
-	function calculateDepsForTests(game){
-		
+	/**
+	 * Deletes all events taken place after given step 
+	 * @param {Object} state The battlestate to operate on
+	 * @param {Object} step The stepnumber to revert to (not included in deletion)
+	 * @return {Object} the updated battlestate
+	 */
+	function RevertToStep(state,step){
+		var cont, i, overstep, o, p;
+		["units","board"].forEach(function(kind){
+			for (var id in state[kind]) {
+				o = state[kind][id];
+				for(var prop in o){
+					p = o[prop];
+					breakpoint = 666;
+					overstep = true;
+					i = p.length; 
+					while (overstep && i) {
+						i--;
+						if (p[i][0]>step){
+							breakpoint = i;
+						}
+						else {
+							overstep = false;
+						}
+					}
+					p.splice(breakpoint);
+					if (!p.length){
+						delete o[prop];
+					}
+				}
+				var deletedall = true;
+				for(var op in o){deletedall = false;}
+				if (deletedall){
+					delete state[kind][id];
+				}
+			}
+		});
+		for(var t = state.nextstep;t>step;t--){
+			delete state.moves[t];
+		}
+		state.nextstep = step+1;
+		return state;
 	}
+	
+	function Below(arr,num){
+		return arr.concat(num).sort(function(a,b){return a>b;}).indexOf(num);
+	}
+	
+	/**
+	 * Delete all given steps, rename all affected steps accordingly
+	 * @param {Object} state The battlestate
+	 * @param {Array} steps Array of steps to delete
+	 * @return {Object} the updated battlestate
+	 */
+	function DeleteSteps(state,steps){
+		var cont, i, below, o, p;
+		["units","board"].forEach(function(kind){
+			for (var id in state[kind]) {
+				o = state[kind][id];
+				for(var prop in o){
+					p = o[prop];
+					breakpoint = 666;
+					overstep = true;
+					i = p.length-1; 
+					while (i>-1) {
+						below = Below(steps,p[i][0]);
+						if (steps.indexOf(p[i][0]) != -1){
+							p.splice(i,1);
+						}
+						else {
+							p[i][0]-=below;
+						}
+						i--;
+					}
+					if (!p.length){
+						delete o[prop];
+					}
+				}
+				var deletedall = true;
+				for(var op in o){deletedall = false;}
+				if (deletedall){
+					delete state[kind][id];
+				}
+			}
+		});
+		for(var movetime = steps[0];movetime<state.nextstep;movetime++){
+			if (state.moves[movetime]) {
+				below = Below(steps, movetime);
+				if (steps.indexOf(movetime)===-1){
+					state.moves[movetime-below] = state.moves[movetime]; 
+				}
+				delete state.moves[movetime];
+			}
+		}
+		state.nextstep-=Below(steps,state.nextstep);
+		return state;
+	}
+	
 	
 	
 	// Expose
@@ -497,17 +638,19 @@ Algol = (function(){
 		time: {
 			calcPropertyValue: calcPropertyValue,
 			calcObject: calcObject,
-			calcCollection: calcCollection
+			calcCollection: calcCollection,
+			RevertToStep: RevertToStep,
+			DeleteSteps: DeleteSteps
 		},
 		compile: {
-			calculateDepsForTest: calculateDepsForTest,
-			calculateDepsForTests: calculateDepsForTests
+			calculateDepsForTest: calculateDepsForTest
 		},
 		cauldron: {
 			querier: querier,
 			tester: tester,
 			getUnitBowl: getUnitBowl,
-			getTerrainBowl: getTerrainBowl
+			getTerrainBowl: getTerrainBowl,
+			getAllSquaresBowl: getAllSquaresBowl
 		},
 		artifact: {
 			offset: offset,

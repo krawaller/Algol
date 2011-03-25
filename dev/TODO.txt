@@ -6,27 +6,35 @@
        [X] redo offset
        [X] redo spawn
        [X] remove old t&q + related code
-       [ ]Êlook through castle & daggers for eventual changes
-       
-  [ ] testbuilder (gamedef and testdef, returns recursive testobj expected by tester function)
-       
-  [ ]ÊArtifact generation (customize, dependencies with previous marks, blah)
-       
-  [ ]ÊT&Q dependency calculation
+       [ ] look through castle & daggers for eventual changes
   
-  [ ]ÊArtifact levels (mark/cmnd/turn)
+
+  [/] Time functions
+       [X] RevertToStep
+       [X] DeleteSteps
+       [ ] DeleteUnitSteps
+
+  [ ] A-seed functionality
+  
+  [ ] Artifact generation (customize, dependencies with previous marks, blah)
+  
+  [X] Test OR support
+
+  [X] T&Q dependency calculation
+  
+  [ ] Artifact levels (mark/cmnd/turn)
   
   [ ] Command system, effect API, calculation
 
   [ ] Mark API finalization
  
-  [ ]ÊBattle data object structure
+  [ ] Battle data object structure
  
   [ ] Cauldron fetcher! (with ykx2.0 structure)
       [X] Units
       [ ] Marks
       [X] Terrain
-      [ ] AllSquares
+      [X] AllSquares
       [ ] Artifacts
       
-  [Ê]ÊGhost concept? Hmm. Think through some more. Feature creep! :)
+  [ ] Ghost concept? Hmm. Think through some more. Feature creep! :)

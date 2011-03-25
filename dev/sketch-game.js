@@ -37,7 +37,8 @@ GAME = { // versionspecific object?
 		MARKID: {
 			where: T, // optional? or skip potmark concept?
 			requirements: {
-				mark: MARKID
+				mark: MARKID,
+				markmatch: prop // property in testanswer that must match requiredmark prop (?!)
 			}
 		}
 	},
@@ -60,7 +61,8 @@ GAME = { // versionspecific object?
 				button: DIR,
 				buttonrelsourceunitdir: BOOLEAN
 			},
-			effects: { // GAH! sourceunit shit! how calculate! 
+			effects: { // GAH! sourceunit shit! how calculate!
+				sourceunit: MARKID, // used to pass SOURCEUNITID special var to WHERE tests 
 				increasescoreby: NUMBER, // variables here! 
 				board: [{
 					where: T || MARKID,
@@ -110,7 +112,7 @@ GAME = { // versionspecific object?
 	tests: {
 		TESTID: {
 			tests: [T,T],
-			or: BOOLEAN, // naaaah
+			or: BOOLEAN, // weee!
 			except: T
 		}
 	},

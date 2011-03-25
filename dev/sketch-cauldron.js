@@ -64,7 +64,7 @@ TESTRESULT = {
  *        
  *   Conclusion - needs aseed functionality. Observe, different for each dir! And only if not in start? Hmm.
  *   And what actually needs to happen? The potential marksquare must be compared to currently made mark. So,
- *   a mark should be allowed to give a markid AND a... list of props that must match?
+ *   a mark should be allowed to give a markid AND a... list of props that must match? Hmm...
  *   
  *   This can only be done at mark time, though.
  *   

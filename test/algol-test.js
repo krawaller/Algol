@@ -1,104 +1,173 @@
-TestCase("Algol namespace definition",{
-	"test should be an object": function(){
-		assertObject("should be defined",Algol);
+TestCase("Algol namespace definition", {
+	"test should be an object": function() {
+		assertObject("should be defined", Algol);
 	}
 });
 
-TestCase("CalcPropertyValue",{
-	"test should be defined": function(){
+TestCase("CalcPropertyValue", {
+	"test should be defined": function() {
 		assertFunction(Algol.time.calcPropertyValue);
 	},
-	"test if no changes should just return start value": function(){
-		assertEquals("a",Algol.time.calcPropertyValue("a"));
+	"test if no changes should just return start value": function() {
+		assertEquals("a", Algol.time.calcPropertyValue("a"));
 	},
-	"test if no step, should return last value from the list": function(){
-		assertEquals("d",Algol.time.calcPropertyValue("a",[[2,"b"],[3,"c"],[4,"d"]]));
+	"test if no step, should return last value from the list": function() {
+		assertEquals("d", Algol.time.calcPropertyValue("a", [
+			[2, "b"],
+			[3, "c"],
+			[4, "d"]]));
 	},
-	"test if changes and step, should return correct value": function(){
-		var changes = [[2,"b"],[4,"c"],[8,"d"]];
-		assertEquals("d",Algol.time.calcPropertyValue("a",changes,10));
-		assertEquals("c",Algol.time.calcPropertyValue("a",changes,4));
-		assertEquals("b",Algol.time.calcPropertyValue("a",changes,3));
-		assertEquals("a",Algol.time.calcPropertyValue("a",changes,1));
+	"test if changes and step, should return correct value": function() {
+		var changes = [
+			[2, "b"],
+			[4, "c"],
+			[8, "d"]];
+		assertEquals("d", Algol.time.calcPropertyValue("a", changes, 10));
+		assertEquals("c", Algol.time.calcPropertyValue("a", changes, 4));
+		assertEquals("b", Algol.time.calcPropertyValue("a", changes, 3));
+		assertEquals("a", Algol.time.calcPropertyValue("a", changes, 1));
 	}
 });
 
-
-TestCase("CalcObject",{
-	"test should be defined": function(){
+TestCase("CalcObject", {
+	"test should be defined": function() {
 		assertFunction(Algol.time.calcObject);
 	},
-	"test if no changes, should just return startprops": function(){
-		var startprops = {a:1,b:1,c:1},
+	"test if no changes, should just return startprops": function() {
+		var startprops = {
+			a: 1,
+			b: 1,
+			c: 1
+		},
 			changes = undefined,
 			step = undefined,
-			res = Algol.time.calcObject(startprops,changes,step);
-		assertEquals(startprops,res);
+			res = Algol.time.calcObject(startprops, changes, step);
+		assertEquals(startprops, res);
 	},
-	"test should return correct props": function(){
-		var startprops = {A:"a",B:"b",C:"c"},
+	"test should return correct props": function() {
+		var startprops = {
+			A: "a",
+			B: "b",
+			C: "c"
+		},
 			changes = {
-				A:[[1,"aa"],[3,"aaa"]],
-				B:[[2,"bb"],[5,"bbb"]]
-			},
+			A: [
+				[1, "aa"],
+				[3, "aaa"]],
+			B: [
+				[2, "bb"],
+				[5, "bbb"]]
+		},
 			step = undefined,
-			res = Algol.time.calcObject(startprops,changes,step);
-		assertEquals({A:"aaa",B:"bbb",C:"c"},res);
+			res = Algol.time.calcObject(startprops, changes, step);
+		assertEquals({
+			A: "aaa",
+			B: "bbb",
+			C: "c"
+		},
+		res);
 	},
-	"test should not include future prop if no state for given step": function(){
-		var startprops = {A:"a",B:"b",C:"c"},
+	"test should not include future prop if no state for given step": function() {
+		var startprops = {
+			A: "a",
+			B: "b",
+			C: "c"
+		},
 			changes = {
-				A:[[1,"aa"],[3,"aaa"]],
-				B:[[2,"bb"],[5,"bbb"]],
-				E:[[10,"QQQ"]]
-			},
+			A: [
+				[1, "aa"],
+				[3, "aaa"]],
+			B: [
+				[2, "bb"],
+				[5, "bbb"]],
+			E: [
+				[10, "QQQ"]]
+		},
 			step = 4,
-			res = Algol.time.calcObject(startprops,changes,step);
-		assertEquals({A:"aaa",B:"bb",C:"c"},res);
+			res = Algol.time.calcObject(startprops, changes, step);
+		assertEquals({
+			A: "aaa",
+			B: "bb",
+			C: "c"
+		},
+		res);
 	}
 });
 
-TestCase("calcCollection",{
-	"test should be defined": function(){
+TestCase("calcCollection", {
+	"test should be defined": function() {
 		assertFunction(Algol.time.calcCollection);
 	},
-	"test if no changeset, should just return startset": function(){
+	"test if no changeset, should just return startset": function() {
 		var startset = {
-			u1: {A:"a",B:"b"},
-			u2: {A:"-a",B:"-b"}
+			u1: {
+				A: "a",
+				B: "b"
+			},
+			u2: {
+				A: "-a",
+				B: "-b"
+			}
 		},
-		    changeset = undefined,
+			changeset = undefined,
 			step = undefined,
-			res = Algol.time.calcCollection(startset,changeset,step);
-		assertEquals(startset,res);
+			res = Algol.time.calcCollection(startset, changeset, step);
+		assertEquals(startset, res);
 	},
-	"test should return correct objs": function(){
+	"test should return correct objs": function() {
 		var startset = {
-			u1: {A:"a",B:"b"},
-			u2: {A:"-a",B:"-b"},
-			u3: {A:"--a",B:"--b"}
+			u1: {
+				A: "a",
+				B: "b"
+			},
+			u2: {
+				A: "-a",
+				B: "-b"
+			},
+			u3: {
+				A: "--a",
+				B: "--b"
+			}
 		},
-		changeset = {
-			u1:	{A:[[2,"aa"],[4,"aaa"]]},
-			u2: {A:[[2,"-aa"],[4,"-aaa"]]}
+			changeset = {
+			u1: {
+				A: [
+					[2, "aa"],
+					[4, "aaa"]]
+			},
+			u2: {
+				A: [
+					[2, "-aa"],
+					[4, "-aaa"]]
+			}
 		},
 			step = 3,
-			res = Algol.time.calcCollection(startset,changeset,step),
+			res = Algol.time.calcCollection(startset, changeset, step),
 			exp = {
-				u1: {A:"aa",B:"b"},
-				u2: {A:"-aa",B:"-b"},
-				u3: startset.u3
-			} ;
-		assertEquals(res,exp);
+			u1: {
+				A: "aa",
+				B: "b"
+			},
+			u2: {
+				A: "-aa",
+				B: "-b"
+			},
+			u3: startset.u3
+		};
+		assertEquals(res, exp);
 	}
 });
 
-TestCase("Artifact Offset",{
-	"test should be defined": function(){
+TestCase("Artifact Offset", {
+	"test should be defined": function() {
 		assertFunction(Algol.artifact.offset);
 	},
-	"test should return correct artifacts": function(){
-		var definition, starts, boarddims = {x:7,y:5}, exp, res;
+	"test should return correct artifacts": function() {
+		var definition, starts, boarddims = {
+			x: 7,
+			y: 5
+		},
+			exp, res;
 		definition = {
 			forward: 2,
 			right: 3,
@@ -134,11 +203,15 @@ TestCase("Artifact Offset",{
 				artifactdir: 1
 			}
 		};
-		res = Algol.artifact.offset(definition,starts,boarddims);
-		assertEquals(exp,res);
+		res = Algol.artifact.offset(definition, starts, boarddims);
+		assertEquals(exp, res);
 	},
-	"test generated artifacts should include stuff from startsquare": function(){
-		var definition, starts, boarddims = {x:7,y:5}, exp, res;
+	"test generated artifacts should include stuff from startsquare": function() {
+		var definition, starts, boarddims = {
+			x: 7,
+			y: 5
+		},
+			exp, res;
 		definition = {
 			forward: 2,
 			right: 3,
@@ -167,7 +240,7 @@ TestCase("Artifact Offset",{
 				artifact: "offset",
 				aid: "FOO",
 				artifactdir: 1,
-				foo:"bar"
+				foo: "bar"
 			},
 			2007: {
 				x: 7,
@@ -175,14 +248,18 @@ TestCase("Artifact Offset",{
 				artifact: "offset",
 				aid: "FOO",
 				artifactdir: 1,
-				bar:"baz"
+				bar: "baz"
 			}
 		};
-		res = Algol.artifact.offset(definition,starts,boarddims);
-		assertEquals(exp,res);
+		res = Algol.artifact.offset(definition, starts, boarddims);
+		assertEquals(exp, res);
 	},
-	"test should have support for relative direction": function(){
-		var definition, starts, boarddims = {x:7,y:5}, exp, res;
+	"test should have support for relative direction": function() {
+		var definition, starts, boarddims = {
+			x: 7,
+			y: 5
+		},
+			exp, res;
 		definition = {
 			forward: 2,
 			right: 1,
@@ -234,20 +311,24 @@ TestCase("Artifact Offset",{
 				artifactdir: 5
 			}
 		};
-		res = Algol.artifact.offset(definition,starts,boarddims);
-		assertEquals(exp,res);
+		res = Algol.artifact.offset(definition, starts, boarddims);
+		assertEquals(exp, res);
 	}
 });
 
-TestCase("Artifact walker",{
-	"test should be defined":function(){
+TestCase("Artifact walker", {
+	"test should be defined": function() {
 		assertFunction(Algol.artifact.walker);
 	},
-	"test should return correct artifacts": function(){
-		var def,starts,stops,boarddims = {x:7,y:5}, exp, res;
+	"test should return correct artifacts": function() {
+		var def, starts, stops, boarddims = {
+			x: 7,
+			y: 5
+		},
+			exp, res;
 		def = {
 			aid: "FOO",
-			dirs: [1,3,5],
+			dirs: [1, 3, 5],
 			createatstop: true
 		};
 		starts = {
@@ -282,12 +363,15 @@ TestCase("Artifact walker",{
 				artifactdir: 3
 			}
 		};
-		res = Algol.artifact.walker(def,starts,stops,boarddims);
-		console.log(exp,res);
-		assertEquals(exp,res);
+		res = Algol.artifact.walker(def, starts, stops, boarddims);
+		assertEquals(exp, res);
 	},
-	"test should mark steps also if createatstep is set": function(){
-		var def,starts,stops,boarddims = {x:7,y:5}, exp, res;
+	"test should mark steps also if createatstep is set": function() {
+		var def, starts, stops, boarddims = {
+			x: 7,
+			y: 5
+		},
+			exp, res;
 		def = {
 			aid: "FOO",
 			dirs: [1],
@@ -331,11 +415,15 @@ TestCase("Artifact walker",{
 				artifactdir: 1
 			}
 		};
-		res = Algol.artifact.walker(def,starts,stops,boarddims);
-		assertEquals(exp,res);
+		res = Algol.artifact.walker(def, starts, stops, boarddims);
+		assertEquals(exp, res);
 	},
-	"test should not mark stop if no createatstop is set": function(){
-		var def,starts,stops,boarddims = {x:7,y:5}, exp, res;
+	"test should not mark stop if no createatstop is set": function() {
+		var def, starts, stops, boarddims = {
+			x: 7,
+			y: 5
+		},
+			exp, res;
 		def = {
 			aid: "FOO",
 			dirs: [1],
@@ -371,11 +459,15 @@ TestCase("Artifact walker",{
 				artifactdir: 1
 			}
 		};
-		res = Algol.artifact.walker(def,starts,stops,boarddims);
-		assertEquals(exp,res);
+		res = Algol.artifact.walker(def, starts, stops, boarddims);
+		assertEquals(exp, res);
 	},
-	"test should include stuff from startsquare": function(){
-		var def,starts,stops,boarddims = {x:7,y:5}, exp, res;
+	"test should include stuff from startsquare": function() {
+		var def, starts, stops, boarddims = {
+			x: 7,
+			y: 5
+		},
+			exp, res;
 		def = {
 			aid: "FOO",
 			dirs: [1],
@@ -423,14 +515,18 @@ TestCase("Artifact walker",{
 				artifactdir: 1
 			}
 		};
-		res = Algol.artifact.walker(def,starts,stops,boarddims);
-		assertEquals(exp,res);
+		res = Algol.artifact.walker(def, starts, stops, boarddims);
+		assertEquals(exp, res);
 	},
-	"test should support relative dirs": function(){
-		var def,starts,stops,boarddims = {x:7,y:5}, exp, res;
+	"test should support relative dirs": function() {
+		var def, starts, stops, boarddims = {
+			x: 7,
+			y: 5
+		},
+			exp, res;
 		def = {
 			aid: "FOO",
-			dirs: [1,3],
+			dirs: [1, 3],
 			createatstop: true,
 			createatstep: true,
 			relative: true
@@ -488,11 +584,15 @@ TestCase("Artifact walker",{
 				artifactdir: 5
 			}
 		};
-		res = Algol.artifact.walker(def,starts,stops,boarddims);
-		assertEquals(exp,res);
+		res = Algol.artifact.walker(def, starts, stops, boarddims);
+		assertEquals(exp, res);
 	},
-	"test should work with non-orthogonal relative dirs": function(){
-		var def,starts,stops,boarddims = {x:7,y:5}, exp, res;
+	"test should work with non-orthogonal relative dirs": function() {
+		var def, starts, stops, boarddims = {
+			x: 7,
+			y: 5
+		},
+			exp, res;
 		def = {
 			aid: "FOO",
 			dirs: [1],
@@ -544,11 +644,15 @@ TestCase("Artifact walker",{
 				artifactdir: 2
 			}
 		};
-		res = Algol.artifact.walker(def,starts,stops,boarddims);
-		assertEquals(exp,res);
+		res = Algol.artifact.walker(def, starts, stops, boarddims);
+		assertEquals(exp, res);
 	},
-	"test should honour maxlength": function(){
-		var def,starts,stops,boarddims = {x:7,y:5}, exp, res;
+	"test should honour maxlength": function() {
+		var def, starts, stops, boarddims = {
+			x: 7,
+			y: 5
+		},
+			exp, res;
 		def = {
 			aid: "FOO",
 			dirs: [1],
@@ -603,11 +707,15 @@ TestCase("Artifact walker",{
 				artifactdir: 3
 			}
 		};
-		res = Algol.artifact.walker(def,starts,stops,boarddims);
-		assertEquals(exp,res);
+		res = Algol.artifact.walker(def, starts, stops, boarddims);
+		assertEquals(exp, res);
 	},
-	"test should honour steps if set": function(){
-		var def,starts,stops,steps,boarddims = {x:7,y:5}, exp, res;
+	"test should honour steps if set": function() {
+		var def, starts, stops, steps, boarddims = {
+			x: 7,
+			y: 5
+		},
+			exp, res;
 		def = {
 			aid: "FOO",
 			dirs: [1],
@@ -648,23 +756,25 @@ TestCase("Artifact walker",{
 				artifactdir: 1
 			}
 		};
-		res = Algol.artifact.walker(def,starts,stops,boarddims,steps);
-		assertEquals(exp,res);
+		res = Algol.artifact.walker(def, starts, stops, boarddims, steps);
+		assertEquals(exp, res);
 	}
 });
 
-TestCase("Spawn",{
-	"test should be defined": function(){
+TestCase("Spawn", {
+	"test should be defined": function() {
 		assertFunction(Algol.artifact.spawn);
 	},
-	"test should return correct artifacts": function(){
+	"test should return correct artifacts": function() {
 		var where, exp, def, res;
 		def = {
 			aid: "spawntest"
 		};
 		where = {
 			3002: {
-				x:2,y:3,foo:"BAR"
+				x: 2,
+				y: 3,
+				foo: "BAR"
 			}
 		};
 		exp = {
@@ -676,126 +786,158 @@ TestCase("Spawn",{
 				artifact: "spawn"
 			}
 		};
-		res = Algol.artifact.spawn(def,where); 
-		assertEquals(exp,res);
+		res = Algol.artifact.spawn(def, where);
+		assertEquals(exp, res);
 	}
 });
 
-TestCase("MoveInDir",{
-	"test should be defined":function(){
+TestCase("MoveInDir", {
+	"test should be defined": function() {
 		assertFunction(Algol.utils.moveInDir);
 	},
-	"test should return proper coords": function(){
-		assertEquals({x:5,y:1},Algol.utils.moveInDir(4,4,1,3,1));
-		assertEquals({x:8,y:2},Algol.utils.moveInDir(4,4,2,3,1));
-		assertEquals({x:7,y:5},Algol.utils.moveInDir(4,4,3,3,1));
-		assertEquals({x:6,y:8},Algol.utils.moveInDir(4,4,4,3,1));
-		assertEquals({x:3,y:7},Algol.utils.moveInDir(4,4,5,3,1));
-		assertEquals({x:0,y:6},Algol.utils.moveInDir(4,4,6,3,1));
-		assertEquals({x:1,y:3},Algol.utils.moveInDir(4,4,7,3,1));
-		assertEquals({x:2,y:0},Algol.utils.moveInDir(4,4,8,3,1));
+	"test should return proper coords": function() {
+		assertEquals({
+			x: 5,
+			y: 1
+		},
+		Algol.utils.moveInDir(4, 4, 1, 3, 1));
+		assertEquals({
+			x: 8,
+			y: 2
+		},
+		Algol.utils.moveInDir(4, 4, 2, 3, 1));
+		assertEquals({
+			x: 7,
+			y: 5
+		},
+		Algol.utils.moveInDir(4, 4, 3, 3, 1));
+		assertEquals({
+			x: 6,
+			y: 8
+		},
+		Algol.utils.moveInDir(4, 4, 4, 3, 1));
+		assertEquals({
+			x: 3,
+			y: 7
+		},
+		Algol.utils.moveInDir(4, 4, 5, 3, 1));
+		assertEquals({
+			x: 0,
+			y: 6
+		},
+		Algol.utils.moveInDir(4, 4, 6, 3, 1));
+		assertEquals({
+			x: 1,
+			y: 3
+		},
+		Algol.utils.moveInDir(4, 4, 7, 3, 1));
+		assertEquals({
+			x: 2,
+			y: 0
+		},
+		Algol.utils.moveInDir(4, 4, 8, 3, 1));
 	}
 });
 
-TestCase("dirRelativeTo",{
-	"test should be defined": function(){
+TestCase("dirRelativeTo", {
+	"test should be defined": function() {
 		assertFunction(Algol.utils.dirRelativeTo);
 	},
-	"test should return proper translations": function(){
-		assertEquals(4,Algol.utils.dirRelativeTo(1,4));
-		assertEquals(5,Algol.utils.dirRelativeTo(2,4));
-		assertEquals(7,Algol.utils.dirRelativeTo(8,8));
-		assertEquals(1,Algol.utils.dirRelativeTo(3,7));
+	"test should return proper translations": function() {
+		assertEquals(4, Algol.utils.dirRelativeTo(1, 4));
+		assertEquals(5, Algol.utils.dirRelativeTo(2, 4));
+		assertEquals(7, Algol.utils.dirRelativeTo(8, 8));
+		assertEquals(1, Algol.utils.dirRelativeTo(3, 7));
 	}
 });
 
-
-TestCase("MeldObjects",{
-	"test should be defined": function(){
+TestCase("MeldObjects", {
+	"test should be defined": function() {
 		assertFunction(Algol.utils.meldObjects);
 	},
-	"test should meld objects with different props": function(){
+	"test should meld objects with different props": function() {
 		var o1, o2, res, exp;
 		o1 = {
-			foo:"bar"
+			foo: "bar"
 		};
 		o2 = {
-			baz:"biz"
+			baz: "biz"
 		};
 		exp = {
 			foo: "bar",
 			baz: "biz"
 		};
-		res = Algol.utils.meldObjects(o1,o2);
-		assertEquals(exp,res);
+		res = Algol.utils.meldObjects(o1, o2);
+		assertEquals(exp, res);
 	},
-	"test should retain 1 version of duplicate prop with same value": function(){
+	"test should retain 1 version of duplicate prop with same value": function() {
 		var o1, o2, res, exp;
 		o1 = {
-			foo:"bar",
-			x:5
+			foo: "bar",
+			x: 5
 		};
 		o2 = {
-			baz:"biz",
-			x:5
+			baz: "biz",
+			x: 5
 		};
 		exp = {
 			foo: "bar",
 			baz: "biz",
-			x:5
+			x: 5
 		};
-		res = Algol.utils.meldObjects(o1,o2);
-		assertEquals(exp,res);
+		res = Algol.utils.meldObjects(o1, o2);
+		assertEquals(exp, res);
 	},
-	"test should make array for same props with different values": function(){
+	"test should make array for same props with different values": function() {
 		var o1, o2, res, exp;
 		o1 = {
-			foo:"bar",
-			x:5
+			foo: "bar",
+			x: 5
 		};
 		o2 = {
-			baz:"biz",
-			x:7
+			baz: "biz",
+			x: 7
 		};
 		exp = {
 			foo: "bar",
 			baz: "biz",
-			x:[5,7]
+			x: [5, 7]
 		};
-		res = Algol.utils.meldObjects(o1,o2);
-		assertEquals(exp,res);
+		res = Algol.utils.meldObjects(o1, o2);
+		assertEquals(exp, res);
 	},
-	"test should extend array for same prop if 1st is already array": function(){
+	"test should extend array for same prop if 1st is already array": function() {
 		var o1, o2, res, exp;
 		o1 = {
-			foo:"bar",
-			x:[5,7]
+			foo: "bar",
+			x: [5, 7]
 		};
 		o2 = {
-			baz:"biz",
-			x:8
+			baz: "biz",
+			x: 8
 		};
 		exp = {
 			foo: "bar",
 			baz: "biz",
-			x:[5,7,8]
+			x: [5, 7, 8]
 		};
-		res = Algol.utils.meldObjects(o1,o2);
-		assertEquals(exp,res);
+		res = Algol.utils.meldObjects(o1, o2);
+		assertEquals(exp, res);
 	}
 });
 
-TestCase("Tester (YKX version)",{
-	"test should be defined": function(){
+TestCase("Tester (YKX version)", {
+	"test should be defined": function() {
 		assertFunction(Algol.cauldron.tester);
 	},
-	"test should execute single query correctly": function(){
+	"test should execute single query correctly": function() {
 		var cauldron, test, vars, res, exp;
 		cauldron = {
 			hat: {
 				8003: [{
 					foo: "bar"
-				},{
+				},
+				{
 					foo: "bee"
 				}],
 				1005: [{
@@ -814,16 +956,17 @@ TestCase("Tester (YKX version)",{
 				foo: "bee"
 			}
 		};
-		res = Algol.cauldron.tester(cauldron,test,vars);
-		assertEquals(exp,res);
+		res = Algol.cauldron.tester(cauldron, test, vars);
+		assertEquals(exp, res);
 	},
-	"test should run normal AND test properly": function(){
+	"test should run normal AND test properly": function() {
 		var cauldron, test, query1, query2, res, exp;
 		cauldron = {
 			hat: {
 				8003: [{
 					foo: "bar"
-				},{
+				},
+				{
 					foo: "bee"
 				}],
 				1005: [{
@@ -840,30 +983,32 @@ TestCase("Tester (YKX version)",{
 			tests: [{
 				from: "hat",
 				props: {
-					foo:["wee","bee"]
+					foo: ["wee", "bee"]
 				}
-			},{
+			},
+			{
 				from: "cat",
 				props: {
-					foo:"wuu"
+					foo: "wuu"
 				}
 			}]
 		};
 		exp = {
 			1005: {
-				foo: ["wuu","wee"]
+				foo: ["wuu", "wee"]
 			}
 		};
-		res = Algol.cauldron.tester(cauldron,test,{});
-		assertEquals(exp,res);
+		res = Algol.cauldron.tester(cauldron, test, {});
+		assertEquals(exp, res);
 	},
-	"test should run honour except test": function(){
+	"test should run honour except test": function() {
 		var cauldron, test, res, exp;
 		cauldron = {
 			hat: {
 				8003: [{
 					foo: "bar"
-				},{
+				},
+				{
 					foo: "bee"
 				}],
 				1005: [{
@@ -880,7 +1025,7 @@ TestCase("Tester (YKX version)",{
 			tests: [{
 				from: "hat",
 				props: {
-					foo:["bar","wee"]
+					foo: ["bar", "wee"]
 				}
 			}],
 			except: {
@@ -895,22 +1040,68 @@ TestCase("Tester (YKX version)",{
 				foo: "bar"
 			}
 		};
-		res = Algol.cauldron.tester(cauldron,test,{});
-		assertEquals(exp,res);
+		res = Algol.cauldron.tester(cauldron, test, {});
+		assertEquals(exp, res);
+	},
+	"test should run OR test properly": function() {
+		var cauldron, test, query1, query2, res, exp;
+		cauldron = {
+			hat: {
+				1005: {
+					foo: "bar"
+				},
+				6006: {
+					foo: "POO"
+				},
+				8003: {
+					foo: "bar"
+				}
+			},
+			cat: {
+				1005: {
+					foo: "wuu"
+				}
+			}
+		};
+		test = {
+			tests: [{
+				from: "hat",
+				props: {
+					foo: "bar"
+				}
+			},{
+				from: "cat",
+				props: {
+					foo: "wuu"
+				}
+			}],
+			or: true
+		};
+		exp = {
+			1005: {
+				foo: ["wuu","bar"]
+			},
+			8003: {
+				foo: "bar"
+			}
+		};
+		res = Algol.cauldron.tester(cauldron, test, {});
+		assertEquals(exp, res);
 	}
 });
 
-TestCase("Querier (YKX version)",{
-	"test should be defined": function(){
+TestCase("Querier (YKX version)", {
+	"test should be defined": function() {
 		assertFunction(Algol.cauldron.querier);
 	},
-	"test should return array of objects with unique positions that fulfil the props reqs": function(){
+	"test should return array of objects with unique positions that fulfil the props reqs": function() {
 		var cauldron, query, res, exp;
 		cauldron = {
 			hat: {
 				8003: [{
 					foo: "bar"
-				},{
+				},
+				{
 					foo: "bee"
 				}],
 				1005: [{
@@ -929,15 +1120,16 @@ TestCase("Querier (YKX version)",{
 				foo: "bee"
 			}
 		};
-		res = Algol.cauldron.querier(cauldron,query);
-		assertEquals(exp,res);
+		res = Algol.cauldron.querier(cauldron, query);
+		assertEquals(exp, res);
 	},
-	"test should handle being give bowl straight instead of cauldron": function(){
+	"test should handle being give bowl straight instead of cauldron": function() {
 		var bowl, query, res, exp;
 		bowl = {
 			8003: [{
 				foo: "bar"
-			}, {
+			},
+			{
 				foo: "bee"
 			}],
 			1005: [{
@@ -955,15 +1147,16 @@ TestCase("Querier (YKX version)",{
 				foo: "bee"
 			}
 		};
-		res = Algol.cauldron.querier(bowl,query);
-		assertEquals(exp,res);
+		res = Algol.cauldron.querier(bowl, query);
+		assertEquals(exp, res);
 	},
-	"test should handle multiple possible values in props": function(){
+	"test should handle multiple possible values in props": function() {
 		var bowl, query, res, exp;
 		bowl = {
 			8003: [{
 				foo: "bar"
-			}, {
+			},
+			{
 				foo: "bee"
 			}],
 			1005: [{
@@ -973,7 +1166,7 @@ TestCase("Querier (YKX version)",{
 		query = {
 			from: "hat",
 			props: {
-				foo: ["bee","waa"]
+				foo: ["bee", "waa"]
 			}
 		};
 		exp = {
@@ -981,15 +1174,16 @@ TestCase("Querier (YKX version)",{
 				foo: "bee"
 			}
 		};
-		res = Algol.cauldron.querier(bowl,query);
-		assertEquals(exp,res);
+		res = Algol.cauldron.querier(bowl, query);
+		assertEquals(exp, res);
 	},
-	"test should handle variables": function(){
+	"test should handle variables": function() {
 		var bowl, query, res, exp, vars;
 		bowl = {
 			8003: [{
 				foo: 2
-			}, {
+			},
+			{
 				foo: "bee"
 			}],
 			1005: [{
@@ -1008,17 +1202,18 @@ TestCase("Querier (YKX version)",{
 			}
 		};
 		vars = {
-			"CURRENTPLAYER":2
+			"CURRENTPLAYER": 2
 		};
-		res = Algol.cauldron.querier(bowl,query,vars);
-		assertEquals(exp,res);
+		res = Algol.cauldron.querier(bowl, query, vars);
+		assertEquals(exp, res);
 	},
-	"test should handle variables in array of multiple values": function(){
+	"test should handle variables in array of multiple values": function() {
 		var bowl, query, res, exp, vars;
 		bowl = {
 			8003: [{
 				foo: 2
-			}, {
+			},
+			{
 				foo: "bee"
 			}],
 			1005: [{
@@ -1028,7 +1223,7 @@ TestCase("Querier (YKX version)",{
 		query = {
 			from: "hat",
 			props: {
-				foo: ["boo","CURRENTPLAYER"]
+				foo: ["boo", "CURRENTPLAYER"]
 			}
 		};
 		exp = {
@@ -1037,12 +1232,12 @@ TestCase("Querier (YKX version)",{
 			}
 		};
 		vars = {
-			"CURRENTPLAYER":2
+			"CURRENTPLAYER": 2
 		};
-		res = Algol.cauldron.querier(bowl,query,vars);
-		assertEquals(exp,res);
+		res = Algol.cauldron.querier(bowl, query, vars);
+		assertEquals(exp, res);
 	},
-	"test should handle bowl with single-value YKX entry": function(){
+	"test should handle bowl with single-value YKX entry": function() {
 		var bowl, query, res, exp, vars;
 		bowl = {
 			8003: {
@@ -1052,7 +1247,7 @@ TestCase("Querier (YKX version)",{
 		query = {
 			from: "hat",
 			props: {
-				foo: ["boo","CURRENTPLAYER"]
+				foo: ["boo", "CURRENTPLAYER"]
 			}
 		};
 		exp = {
@@ -1061,18 +1256,19 @@ TestCase("Querier (YKX version)",{
 			}
 		};
 		vars = {
-			"CURRENTPLAYER":2
+			"CURRENTPLAYER": 2
 		};
-		res = Algol.cauldron.querier(bowl,query,vars);
-		assertEquals(exp,res);
+		res = Algol.cauldron.querier(bowl, query, vars);
+		assertEquals(exp, res);
 	},
-	"test should meld objects if more than 1 fulfil query": function(){
+	"test should meld objects if more than 1 fulfil query": function() {
 		var bowl, query, res, exp;
 		bowl = {
 			8003: [{
 				foo: "bee",
 				what: "bah"
-			}, {
+			},
+			{
 				foo: "bee",
 				what: "guh",
 				x: 666
@@ -1090,25 +1286,23 @@ TestCase("Querier (YKX version)",{
 		exp = {
 			8003: {
 				foo: "bee",
-				what: ["bah","guh"],
+				what: ["bah", "guh"],
 				x: 666
 			},
 			1005: {
 				foo: "bee"
 			}
 		};
-		res = Algol.cauldron.querier(bowl,query);
-		assertEquals(exp,res);
+		res = Algol.cauldron.querier(bowl, query);
+		assertEquals(exp, res);
 	}
 });
 
-
-
-TestCase("Cauldron - GetUnitBowl",{
-	"test should be defined": function(){
+TestCase("Cauldron - GetUnitBowl", {
+	"test should be defined": function() {
 		assertFunction(Algol.cauldron.getUnitBowl);
 	},
-	"test should get right timestate": function(){
+	"test should get right timestate": function() {
 		var setup, states, moulds, exp, res, step = 5;
 		setup = {
 			1: {
@@ -1119,17 +1313,26 @@ TestCase("Cauldron - GetUnitBowl",{
 		};
 		states = {
 			1: {
-				x: [[2,4],[4,5],[6,10]]
+				x: [
+					[2, 4],
+					[4, 5],
+					[6, 10]]
 			}
 		};
 		moulds = {
-			
+
 		};
-		exp = {1005:[{uid:1,x:5,y:1}]};
-		res = Algol.cauldron.getUnitBowl(setup,states,moulds,step);
-		assertEquals(exp,res);
+		exp = {
+			1005: [{
+				uid: 1,
+				x: 5,
+				y: 1
+			}]
+		};
+		res = Algol.cauldron.getUnitBowl(setup, states, moulds, step);
+		assertEquals(exp, res);
 	},
-	"test should include props from mould": function(){
+	"test should include props from mould": function() {
 		var setup, states, moulds, exp, res, step = 5;
 		setup = {
 			1: {
@@ -1141,7 +1344,10 @@ TestCase("Cauldron - GetUnitBowl",{
 		};
 		states = {
 			1: {
-				x: [[2,4],[4,5],[6,10]]
+				x: [
+					[2, 4],
+					[4, 5],
+					[6, 10]]
 			}
 		};
 		moulds = {
@@ -1158,16 +1364,16 @@ TestCase("Cauldron - GetUnitBowl",{
 				bar: "baz"
 			}]
 		};
-		res = Algol.cauldron.getUnitBowl(setup,states,moulds,step);
-		assertEquals(exp,res);
+		res = Algol.cauldron.getUnitBowl(setup, states, moulds, step);
+		assertEquals(exp, res);
 	}
 });
 
-TestCase("Cauldron - GetTerrainBowl",{
-	"test should be defined": function(){
+TestCase("Cauldron - GetTerrainBowl", {
+	"test should be defined": function() {
 		assertFunction(Algol.cauldron.getTerrainBowl);
 	},
-	"test should get right timestate": function(){
+	"test should get right timestate": function() {
 		var terrain, states, moulds, exp, res, step = 5;
 		terrain = {
 			1001: {
@@ -1178,17 +1384,22 @@ TestCase("Cauldron - GetTerrainBowl",{
 		};
 		shifts = {
 			1001: {
-				foo: [[4,"baz"]]
+				foo: [
+					[4, "baz"]]
 			}
 		};
 		moulds = {};
 		exp = {
-			1001: {x:1,y:1,foo:"baz"}
+			1001: {
+				x: 1,
+				y: 1,
+				foo: "baz"
+			}
 		};
-		res = Algol.cauldron.getTerrainBowl(terrain,shifts,moulds,step);
-		assertEquals(exp,res);
+		res = Algol.cauldron.getTerrainBowl(terrain, shifts, moulds, step);
+		assertEquals(exp, res);
 	},
-	"test should augment props from mould if appropriate": function(){
+	"test should augment props from mould if appropriate": function() {
 		var terrain, states, moulds, exp, res, step = 5;
 		terrain = {
 			1001: {
@@ -1199,7 +1410,8 @@ TestCase("Cauldron - GetTerrainBowl",{
 		};
 		shifts = {
 			1001: {
-				terrain: [[4,"forest"]]
+				terrain: [
+					[4, "forest"]]
 			}
 		};
 		moulds = {
@@ -1208,21 +1420,81 @@ TestCase("Cauldron - GetTerrainBowl",{
 			}
 		};
 		exp = {
-			1001: {x:1,y:1,terrain:"forest",trees:"a lot"}
+			1001: {
+				x: 1,
+				y: 1,
+				terrain: "forest",
+				trees: "a lot"
+			}
 		};
-		res = Algol.cauldron.getTerrainBowl(terrain,shifts,moulds,step);
-		assertEquals(exp,res);
+		res = Algol.cauldron.getTerrainBowl(terrain, shifts, moulds, step);
+		assertEquals(exp, res);
 	}
 });
 
-TestCase("calculateDepsForTest",{
-	"test should be defined": function(){
+TestCase("GetAllSquaresBowl", {
+	"test should be defined": function() {
+		assertFunction(Algol.cauldron.getAllSquaresBowl);
+	},
+	"test should have an entry per square": function() {
+		var board, expprops, res = [],
+			i = 0;
+		boarddef = {
+			height: 2,
+			width: 3
+		};
+		expectedprops = [1001, 1002, 1003, 2001, 2002, 2003];
+		for (var p in Algol.cauldron.getAllSquaresBowl(boarddef)) {
+			res.push(p);
+		}
+		assertEquals(expectedprops, res);
+	},
+	"test should include square coords": function() {
+		var board, res;
+		boarddef = {
+			height: 2,
+			width: 3
+		};
+		res = Algol.cauldron.getAllSquaresBowl(boarddef);
+		assertEquals(1, res[2001].x);
+		assertEquals(2, res[2001].y);
+	},
+	"test should include colour coords correctly for even width boards": function() {
+		var board, res;
+		boarddef = {
+			height: 2,
+			width: 4
+		};
+		res = Algol.cauldron.getAllSquaresBowl(boarddef);
+		assertEquals("white", res[1001].colour);
+		assertEquals("black", res[1004].colour);
+		assertEquals("black", res[2001].colour);
+		assertEquals("white", res[2004].colour);
+	},
+	"test should include colour coords correctly for odd width boards": function() {
+		var board, res;
+		boarddef = {
+			height: 2,
+			width: 5
+		};
+		res = Algol.cauldron.getAllSquaresBowl(boarddef);
+		assertEquals("white", res[1001].colour);
+		assertEquals("black", res[1004].colour);
+		assertEquals("black", res[2001].colour);
+		assertEquals("white", res[2004].colour);
+	}
+});
+
+TestCase("calculateDepsForTest", {
+	"test should be defined": function() {
 		assertFunction(Algol.compile.calculateDepsForTest);
 	},
-	"test should calc dependency for queries correctly": function(){
+	"test should calc dependency for queries correctly": function() {
 		var exp, res, game = {
 			queries: {
-				carquery: {from:"cars"}
+				carquery: {
+					from: "cars"
+				}
 			},
 			tests: {
 				vehicletest: {
@@ -1237,14 +1509,18 @@ TestCase("calculateDepsForTest",{
 				cars: true
 			}
 		};
-		res = Algol.compile.calculateDepsForTest(game,"vehicletest");
-		assertEquals(exp,res);
+		res = Algol.compile.calculateDepsForTest(game, "vehicletest");
+		assertEquals(exp, res);
 	},
-	"test should include except query": function(){
+	"test should include except query": function() {
 		var exp, res, game = {
 			queries: {
-				allboatquery: {from:"boats"},
-				rowboatquery: {from:"boats"}
+				allboatquery: {
+					from: "boats"
+				},
+				rowboatquery: {
+					from: "boats"
+				}
 			},
 			tests: {
 				motorboattest: {
@@ -1254,22 +1530,27 @@ TestCase("calculateDepsForTest",{
 			}
 		};
 		exp = {
-			queries: ["allboatquery","rowboatquery"],
+			queries: ["allboatquery", "rowboatquery"],
 			tests: [],
 			bowls: {
 				boats: true
 			}
 		};
-		res = Algol.compile.calculateDepsForTest(game,"motorboattest");
-		assertEquals(exp,res);
-	}
-	,
-	"test should handle test dependency": function(){
+		res = Algol.compile.calculateDepsForTest(game, "motorboattest");
+		assertEquals(exp, res);
+	},
+	"test should handle test dependency": function() {
 		var exp, res, game = {
 			queries: {
-				allboatquery: {from:"boats"},
-				rowboatquery: {from:"boats"},
-				carquery: {from:"cars"}
+				allboatquery: {
+					from: "boats"
+				},
+				rowboatquery: {
+					from: "boats"
+				},
+				carquery: {
+					from: "cars"
+				}
 			},
 			tests: {
 				motorboattest: {
@@ -1277,19 +1558,195 @@ TestCase("calculateDepsForTest",{
 					except: "rowboatquery"
 				},
 				vehicletest: {
-					tests: ["carquery","motorboattest"]
+					tests: ["carquery", "motorboattest"]
 				}
 			}
 		};
 		exp = {
-			queries: ["carquery","allboatquery","rowboatquery"],
+			queries: ["carquery", "allboatquery", "rowboatquery"],
 			tests: ["motorboattest"],
 			bowls: {
 				cars: true,
 				boats: true
 			}
 		};
-		res = Algol.compile.calculateDepsForTest(game,"vehicletest");
-		assertEquals(exp,res);
+		res = Algol.compile.calculateDepsForTest(game, "vehicletest");
+		assertEquals(exp, res);
+	},
+	"test should cache result": function() {
+		var exp, res, cache = {},
+			game = {
+			queries: {
+				carquery: {
+					from: "cars"
+				}
+			},
+			tests: {
+				vehicletest: {
+					tests: ["carquery"]
+				}
+			}
+		};
+		exp = {
+			queries: ["carquery"],
+			tests: [],
+			bowls: {
+				cars: true
+			}
+		};
+		res = Algol.compile.calculateDepsForTest(game, "vehicletest", cache);
+		assertEquals(exp, cache["vehicletest"]);
+	}
+});
+
+TestCase("RevertToStep function",{
+	"test should be defined": function(){
+		assertFunction(Algol.time.RevertToStep);
+	},
+	"test it should revert unit changes accordingly": function(){
+		var state = {
+			units: {
+				someguy: {
+					foo: [[1,"a"],[3,"b"],[5,"c"],[7,"d"],[9,"e"]],
+					bar: [[1,"aa"],[3,"bb"],[5,"cc"]],
+					baz: [[1,"a"],[3,"b"]],
+					bin: [[10,"qqq"]]
+				},
+				someotherguy: {
+					boo: [[10,"qqq"]] 
+				}
+			},
+			board: {},
+			moves: {}
+		},
+		exp = {
+			someguy: {
+				foo: [[1, "a"], [3, "b"], [5, "c"]],
+				bar: [[1, "aa"], [3, "bb"], [5, "cc"]],
+				baz: [[1, "a"], [3, "b"]]
+			}
+		},
+		step = 5,
+		res = Algol.time.RevertToStep(state,step);
+		assertEquals(exp,res.units);
+	},
+	"test it should revert board changes too": function(){
+		var state = {
+			board: {
+				8001: {
+					foo: [[1,"a"],[3,"b"],[5,"c"],[7,"d"],[9,"e"]],
+					bar: [[1,"aa"],[3,"bb"],[5,"cc"]],
+					baz: [[1,"a"],[3,"b"]],
+					bin: [[10,"qqq"]]
+				},
+				5005: {
+					boo: [[10,"qqq"]] 
+				}
+			},
+			units: {},
+			moves: {}
+		},
+		exp = {
+			8001: {
+				foo: [[1, "a"], [3, "b"], [5, "c"]],
+				bar: [[1, "aa"], [3, "bb"], [5, "cc"]],
+				baz: [[1, "a"], [3, "b"]]
+			}
+		},
+		step = 5,
+		res = Algol.time.RevertToStep(state,step);
+		assertEquals(exp,res.board);
+	},
+	"test should delete superfluous moves": function(){
+		var state = {
+			nextstep: 11,
+			board: {},
+			units: {},
+			moves: {
+				5: "foo",
+				10: "bar"
+			}
+		},
+		exp = {
+			5: "foo"
+		},
+		step = 7,
+		res = Algol.time.RevertToStep(state,step);
+		assertEquals(exp,res.moves);
+	},
+	"test should change nextstep": function(){
+		var state = {
+			nextstep: 11,
+			board: {},
+			units: {},
+			moves: {}
+		};
+		assertEquals(8,Algol.time.RevertToStep(state,7).nextstep);
+	}
+});
+
+TestCase("DeleteSteps function",{
+	"test should be defined": function(){
+		assertFunction(Algol.time.DeleteSteps);
+	},
+	"test should fix the moves accordingly": function(){
+		var state = {
+			nextstep: 6,
+			moves: {
+				1: "foo",
+				2: "bar",
+				3: "baz",
+				4: "bin",
+				5: "biz"
+			},
+			units: {},
+			board: {}
+		},
+		exp = {
+			1: "foo",
+			2: "baz",
+			3: "biz"
+		},
+		steps = [2,4],
+		res = Algol.time.DeleteSteps(state,steps);
+		assertEquals(exp,res.moves);
+	},
+	"test should delete given unitchanges and rename others accordingly": function(){
+		var state = {
+			nextstep: 6,
+			moves: {},
+			units: {
+				someguy: {
+					foo: [[1,"a"],[2,"b"],[3,"c"],[4,"d"],[5,"e"]],
+					bar: [[1,"a"],[2,"b"]],
+					baz: [[2,"qqq"],[4,"qqq"]],
+					bin: [[10,"XXX"]]
+				},
+				someotherguy: {
+					foo: [[2,"XXX"]]
+				}
+			},
+			board: {}
+		},
+		exp = {
+			someguy: {
+				foo: [[1,"a"],[2,"c"],[3,"e"]],
+				bar: [[1,"a"]],
+				bin: [[8,"XXX"]]
+			}
+		},
+		steps = [2,4],
+		res = Algol.time.DeleteSteps(state,steps);
+		assertEquals(exp,res.units);
+	},
+	"test should decrease nextstep": function(){
+		var state = {
+			nextstep: 10,
+			moves: {},
+			units: {},
+			board: {}
+		},
+		steps = [2,4,100];
+		assertEquals(8,Algol.time.DeleteSteps(state,steps).nextstep);
 	}
 });
