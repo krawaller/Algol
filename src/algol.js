@@ -37,13 +37,7 @@ Algol = (function(){
 	 * @return Merged object 
 	 */
 	Object.merge = function(){
-    	if (!arguments[0]){
-	        arguments[0] = {};
-	    }
-	    if (!arguments[1]){
-        	arguments[1] = {};
-    	}
-    	for (var property in arguments[1]) {
+        for (var property in arguments[1]) {
 	        if (!arguments[0].hasOwnProperty(property)){ arguments[0][property] = arguments[1][property]; }
 	    }
 	    Array.prototype.splice.call(arguments,1,1);
@@ -204,7 +198,7 @@ Algol = (function(){
 					ret[YKX(newpos)] = Object.merge({artifactdir:dir},newpos,mould,start);
 				}
 			});
-		};
+		}
 		return ret;
 	}
 	
@@ -277,7 +271,7 @@ Algol = (function(){
 					step++; 
 				}
 			});
-		};
+		}
 		return ret;
 	}
 	
