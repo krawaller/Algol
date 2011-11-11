@@ -73,7 +73,7 @@ Algol = (function(){
 			}
 		}
 		throw "What the heck, no value found!";
-	};
+	}
 	
 	/**
 	 * Calculates startvalues and changes for a single object into a given time state
